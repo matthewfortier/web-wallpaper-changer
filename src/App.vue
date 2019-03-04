@@ -61,7 +61,7 @@ export default {
         // it seems to me this additional check would make sense?
         timer = window.setInterval(() => {
           this.grabImages();
-        }, 10 * 1000);
+        }, 60 * 1000);
       } else {
         window.clearInterval(timer);
         timer = null;

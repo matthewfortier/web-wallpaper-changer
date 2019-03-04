@@ -8,7 +8,7 @@
     reddit
       .top(args.subreddit)
       .t("all")
-      .limit(50)
+      .limit(500)
       .fetch(res => {
         var image =
           res.data.children[
