@@ -1,25 +1,30 @@
 <template>
   <div id="app">
     <HeaderBar/>
-    <input placeholder="Subreddit" v-model="subreddit" type="text">
-    <select v-model="scale">
-      <option selected>Fit</option>
-      <option>Auto</option>
-      <option>Fill</option>
-      <option>Stretch</option>
-      <option>Center</option>
-      <option>Tile</option>
-    </select>
-    <button @click="grabImages()">Fetch</button>
-    <button @click="autoRefresh = !autoRefresh">{{ autoRefresh ? "Stop" : "Start" }}</button>
-    <p>{{ picturelist.pictureCount }}</p>
+    <div class="main-content">
+      <input placeholder="Subreddit" v-model="subreddit" type="text">
+      <div class="fetch">
+        <div class="select-wrapper">
+          <select v-model="scale">
+            <option selected>Fit</option>
+            <option>Auto</option>
+            <option>Fill</option>
+            <option>Stretch</option>
+            <option>Center</option>
+            <option>Tile</option>
+          </select>
+        </div>
+        <button @click="grabImages()">Change Wallpaper</button>
+      </div>
+
+      <button @click="autoRefresh = !autoRefresh">{{ autoRefresh ? "Stop" : "Start" }}</button>
+    </div>
   </div>
 </template>
 
 <script>
 import HeaderBar from "@/components/HeaderBar";
 const electron = window.require("electron");
-require("reddit.js");
 
 var timer = null;
 
@@ -44,35 +49,10 @@ export default {
     grabImages() {
       //electron.ipcRenderer.send("grabImages", this.subreddit);
       var that = this;
-
-      that.picturelist.pictures = [];
-      that.picturelist.pictureCount = 0;
-
-      reddit
-        .top(this.subreddit)
-        .t("all")
-        .limit(50)
-        .fetch(res => {
-          this.picturelist.pictureCount = res.data.children.length;
-
-          var image =
-            res.data.children[
-              Math.floor(Math.random() * res.data.children.length)
-            ];
-
-          while (image.data.url.endsWith(".jpg") == false) {
-            console.log("While");
-            image =
-              res.data.children[
-                Math.floor(Math.random() * res.data.children.length)
-              ];
-          }
-
-          electron.ipcRenderer.send("grabImages", {
-            link: image.data.url,
-            scale: this.scale
-          });
-        });
+      electron.ipcRenderer.send("grab-images", {
+        subreddit: this.subreddit,
+        scale: this.scale
+      });
     }
   },
   watch: {
@@ -97,16 +77,96 @@ export default {
 
 <style lang="scss">
 @import "./themes.scss";
+
+@font-face {
+  font-family: "Calibre";
+  src: url("./assets/fonts/calibre-regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Circular";
+  src: url("./assets/fonts/circular-medium.ttf") format("truetype");
+}
+
 body {
-  background-color: $header-color;
+  background-color: #0f111a;
   padding: 0;
   margin: 0;
+  font-family: "Calibre", sans-serif;
 }
 #app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: $flag-selected-color-light;
+
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  input {
+    background-color: transparent;
+    border: none;
+    color: #eee;
+    border-bottom: 2px solid #ffcb6b;
+    outline: none;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: lighten(#090b10, 10);
+    border-radius: 3px;
+    font-family: "Calibre", sans-serif;
+  }
+
+  .fetch {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+
+    .select-wrapper {
+      width: 100%;
+      margin-right: 5px;
+
+      select {
+        width: 100%;
+        min-width: 100px;
+        max-height: 36px;
+        padding: 10px;
+        background-color: lighten(#090b10, 10);
+        border: none;
+        border-bottom: 2px solid #ffcb6b;
+        border-radius: 3px;
+        color: #eee;
+        outline: none;
+        font-family: "Calibre", sans-serif;
+      }
+
+      button {
+        margin-left: 5px;
+      }
+    }
+  }
+  button {
+    height: 36px;
+    max-height: 36px;
+    width: 100%;
+    border: 2px solid #ffcb6b;
+    border-radius: 3px;
+    background-color: lighten(#090b10, 10);
+    color: #ffcb6b;
+    font-family: "Calibre", sans-serif;
+    outline: none;
+
+    &:hover {
+      background-color: lighten(#090b10, 15);
+    }
+
+    &:active {
+      border-radius: 5px;
+    }
+  }
 }
 </style>

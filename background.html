@@ -1,0 +1,32 @@
+<h2>Background</h2>
+
+<script>
+  const { ipcRenderer } = require("electron");
+  require("reddit.js");
+
+  ipcRenderer.on("sub", (event, args) => {
+    reddit
+      .top(args.subreddit)
+      .t("all")
+      .limit(50)
+      .fetch(res => {
+        var image =
+          res.data.children[
+            Math.floor(Math.random() * res.data.children.length)
+          ];
+
+        while (image.data.url.endsWith(".jpg") == false) {
+          console.log("While");
+          image =
+            res.data.children[
+              Math.floor(Math.random() * res.data.children.length)
+            ];
+        }
+
+        ipcRenderer.send("change-wallpaper", {
+          link: image.data.url,
+          scale: args.scale
+        });
+      });
+  });
+</script>

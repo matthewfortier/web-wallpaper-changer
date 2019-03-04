@@ -16,13 +16,16 @@ if (process.env.NODE_ENV === "DEV") {
   url = `file://${process.cwd()}/dist/index.html`;
 }
 
-//url = "http://localhost:8080/";
+url = "http://localhost:8080/";
+
+let mainWindow;
+let backgroundWindow;
 
 app.on("ready", () => {
   const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
   winWidth = 300;
   winHeight = 500;
-  let window = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: winWidth,
     height: winHeight,
     x: width - winWidth - 20,
@@ -31,26 +34,30 @@ app.on("ready", () => {
     transparent: true,
     titleBarStyle: process.platform == "darwin" ? "hiddenInset" : "default"
   });
-  window.loadURL(url);
+  mainWindow.loadURL(url);
+
+  backgroundWindow = createBackgroundProcess();
 });
 
-ipcMain.on("grabImages", (event, args) => {
-  console.log(args);
+function createBackgroundProcess() {
+  var background = new BrowserWindow({ show: false });
+  background.loadURL(`file://${process.cwd()}/background.html`);
+  return background;
+}
+
+ipcMain.on("grab-images", (event, args) => {
+  backgroundWindow.webContents.send("sub", args);
+});
+
+ipcMain.on("change-wallpaper", (event, args) => {
   download
     .image({
       url: args.link,
       dest: path.join(os.homedir(), "/Pictures/Wallpapers")
     })
     .then(({ filename, image }) => {
-      console.log(filename);
-      console.log(image);
-      wallpaper
-        .set(path.resolve(filename), {
-          scale: args.scale.toLowerCase()
-        })
-        .then(() => {
-          console.log(path.resolve(filename));
-          //this.$snackbar.open("Done !");
-        });
+      wallpaper.set(path.resolve(filename), {
+        scale: args.scale.toLowerCase()
+      });
     });
 });

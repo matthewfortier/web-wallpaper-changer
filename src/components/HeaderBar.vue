@@ -1,9 +1,7 @@
 <template>
   <div class="header-bar">
     <div v-bind:class="(os == 'darwin' && !maximized) ? 'darwin' : ''" class="left"></div>
-    <div class="center">
-      <span>{{ title }}</span>
-    </div>
+    <div class="center"></div>
     <div class="right">
       <div v-if="os == 'win32'" class="windows-buttons">
         <div @click="minimize" class="windows-icon-bg">
@@ -56,6 +54,8 @@ export default {
   justify-content: space-between;
   -webkit-app-region: drag;
   user-select: none;
+  background-color: #090b10;
+  border-bottom: 1px solid #000;
 
   .right {
     -webkit-app-region: no-drag;
@@ -69,7 +69,7 @@ export default {
         }
 
         &:hover {
-          background-color: lighten($header-color, 10);
+          background-color: lighten(#090b10, 10);
 
           &:last-child {
             background-color: $windows-close-hover;
