@@ -16,7 +16,7 @@ if (process.env.NODE_ENV === "DEV") {
   url = `file://${process.cwd()}/dist/index.html`;
 }
 
-url = "http://localhost:8080/";
+//url = "http://localhost:8080/";
 
 app.on("ready", () => {
   const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
