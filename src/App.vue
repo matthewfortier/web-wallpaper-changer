@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <input placeholder="Subreddit" v-model="subreddit" type="text" />
+    <HeaderBar/>
+    <input placeholder="Subreddit" v-model="subreddit" type="text">
     <select v-model="scale">
       <option selected>Fit</option>
       <option>Auto</option>
@@ -10,21 +11,23 @@
       <option>Tile</option>
     </select>
     <button @click="grabImages()">Fetch</button>
-    <button @click="autoRefresh = !autoRefresh">
-      {{ autoRefresh ? "Stop" : "Start" }}
-    </button>
+    <button @click="autoRefresh = !autoRefresh">{{ autoRefresh ? "Stop" : "Start" }}</button>
     <p>{{ picturelist.pictureCount }}</p>
   </div>
 </template>
 
 <script>
+import HeaderBar from "@/components/HeaderBar";
 const electron = window.require("electron");
 require("reddit.js");
 
 var timer = null;
 
 export default {
-  name: "Main",
+  name: "app",
+  components: {
+    HeaderBar
+  },
   data() {
     return {
       subreddit: "aww",
@@ -93,21 +96,17 @@ export default {
 </script>
 
 <style lang="scss">
+@import "./themes.scss";
+body {
+  background-color: $header-color;
+  padding: 0;
+  margin: 0;
+}
 #app {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
-}
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+  color: $flag-selected-color-light;
 }
 </style>

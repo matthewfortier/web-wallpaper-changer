@@ -1,68 +1,68 @@
 {
-    "name": "reddit-wallpaper-changer",
-    "version": "0.1.0",
-    "private": true,
-    "scripts": {
-        "serve": "vue-cli-service serve",
-        "build": "vue-cli-service build",
-        "lint": "vue-cli-service lint",
-        "dev": "NODE_ENV=DEV vue-cli-service serve & sleep 5 && NODE_ENV=DEV electron app.js"
+  "name": "reddit-wallpaper-changer",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "dev": "NODE_ENV=DEV vue-cli-service serve & sleep 5 && NODE_ENV=DEV electron app.js"
+  },
+  "dependencies": {
+    "base64-img": "^1.0.4",
+    "electron": "^4.0.6",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "fs": "^0.0.1-security",
+    "image-downloader": "^3.4.2",
+    "nraw": "^0.2.5",
+    "os": "^0.1.1",
+    "path": "^0.12.7",
+    "reddit.js": "^0.1.4",
+    "timers": "^0.1.1",
+    "vue": "^2.6.6",
+    "vue-electron": "^1.0.6",
+    "vue-router": "^3.0.1",
+    "wallpaper": "^4.2.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.4.0",
+    "@vue/cli-plugin-eslint": "^3.4.0",
+    "@vue/cli-service": "^3.4.0",
+    "@vue/eslint-config-prettier": "^4.0.1",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.8.0",
+    "eslint-plugin-vue": "^5.0.0",
+    "node-sass": "^4.9.0",
+    "sass-loader": "^7.1.0",
+    "vue-template-compiler": "^2.5.21"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
     },
-    "dependencies": {
-        "base64-img": "^1.0.4",
-        "electron": "^4.0.6",
-        "eslint-config-prettier": "^4.1.0",
-        "eslint-plugin-prettier": "^3.0.1",
-        "fs": "^0.0.1-security",
-        "image-downloader": "^3.4.2",
-        "nraw": "^0.2.5",
-        "os": "^0.1.1",
-        "path": "^0.12.7",
-        "reddit.js": "^0.1.4",
-        "timers": "^0.1.1",
-        "vue": "^2.6.6",
-        "vue-electron": "^1.0.6",
-        "vue-router": "^3.0.1",
-        "wallpaper": "^4.2.0"
+    "extends": [
+      "plugin:vue/essential",
+      "plugin:prettier/recommended",
+      "eslint:recommended",
+      "@vue/prettier"
+    ],
+    "rules": {
+      "no-console": "off"
     },
-    "devDependencies": {
-        "@vue/cli-plugin-babel": "^3.4.0",
-        "@vue/cli-plugin-eslint": "^3.4.0",
-        "@vue/cli-service": "^3.4.0",
-        "@vue/eslint-config-prettier": "^4.0.1",
-        "babel-eslint": "^10.0.1",
-        "eslint": "^5.8.0",
-        "eslint-plugin-vue": "^5.0.0",
-        "node-sass": "^4.9.0",
-        "sass-loader": "^7.1.0",
-        "vue-template-compiler": "^2.5.21"
-    },
-    "eslintConfig": {
-        "root": true,
-        "env": {
-            "node": true
-        },
-        "extends": [
-            "plugin:vue/essential",
-            "plugin:prettier/recommended",
-            "eslint:recommended",
-            "@vue/prettier"
-        ],
-        "rules": {
-            "no-console": "off"
-        },
-        "parserOptions": {
-            "parser": "babel-eslint"
-        }
-    },
-    "postcss": {
-        "plugins": {
-            "autoprefixer": {}
-        }
-    },
-    "browserslist": [
-        "> 1%",
-        "last 2 versions",
-        "not ie <= 8"
-    ]
+    "parserOptions": {
+      "parser": "babel-eslint"
+    }
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ]
 }

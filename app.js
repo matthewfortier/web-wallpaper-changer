@@ -16,8 +16,21 @@ if (process.env.NODE_ENV === "DEV") {
   url = `file://${process.cwd()}/dist/index.html`;
 }
 
+url = "http://localhost:8080/";
+
 app.on("ready", () => {
-  let window = new BrowserWindow({ width: 800, height: 600 });
+  const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
+  winWidth = 300;
+  winHeight = 500;
+  let window = new BrowserWindow({
+    width: winWidth,
+    height: winHeight,
+    x: width - winWidth - 20,
+    y: height - winHeight - 20,
+    frame: false,
+    transparent: true,
+    titleBarStyle: process.platform == "darwin" ? "hiddenInset" : "default"
+  });
   window.loadURL(url);
 });
 
