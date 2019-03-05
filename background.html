@@ -1,32 +1,36 @@
 <h2>Background</h2>
 
 <script>
-  const { ipcRenderer } = require("electron");
-  require("reddit.js");
+    const { ipcRenderer } = require('electron');
+    require('reddit.js');
 
-  ipcRenderer.on("sub", (event, args) => {
-    reddit
-      .top(args.subreddit)
-      .t("all")
-      .limit(500)
-      .fetch(res => {
-        var image =
-          res.data.children[
-            Math.floor(Math.random() * res.data.children.length)
-          ];
+    ipcRenderer.on('sub', (event, args) => {
+        var subs = args.subreddit.split(',');
+        console.log(subs);
+        var subreddit = subs[Math.floor(Math.random() * subs.length)];
 
-        while (image.data.url.endsWith(".jpg") == false) {
-          console.log("While");
-          image =
-            res.data.children[
-              Math.floor(Math.random() * res.data.children.length)
-            ];
-        }
+        reddit
+            .top(subreddit.trim())
+            .t('all')
+            .limit(500)
+            .fetch(res => {
+                var image =
+                    res.data.children[
+                        Math.floor(Math.random() * res.data.children.length)
+                    ];
 
-        ipcRenderer.send("change-wallpaper", {
-          link: image.data.url,
-          scale: args.scale
-        });
-      });
-  });
+                while (image.data.url.endsWith('.jpg') == false) {
+                    console.log('While');
+                    image =
+                        res.data.children[
+                            Math.floor(Math.random() * res.data.children.length)
+                        ];
+                }
+
+                ipcRenderer.send('change-wallpaper', {
+                    link: image.data.url,
+                    scale: args.scale
+                });
+            });
+    });
 </script>

@@ -1,23 +1,41 @@
 <template>
   <div id="app">
-    <HeaderBar/>
+    <HeaderBar />
     <div class="main-content">
-      <input placeholder="Subreddit" v-model="subreddit" type="text">
+      <input
+        id="subs"
+        placeholder="subreddits"
+        v-model="subreddit"
+        @change="autoRefresh = false"
+        type="text"
+      />
+      <div class="segmented-control">
+        <ul>
+          <li
+            v-for="s in scales"
+            v-bind:key="s"
+            :class="{ active: s == scale }"
+            @click="scale = s"
+          >
+            {{ s }}
+          </li>
+        </ul>
+      </div>
       <div class="fetch">
-        <div class="select-wrapper">
-          <select v-model="scale">
-            <option selected>Fit</option>
-            <option>Auto</option>
-            <option>Fill</option>
-            <option>Stretch</option>
-            <option>Center</option>
-            <option>Tile</option>
-          </select>
-        </div>
-        <button @click="grabImages()">Change Wallpaper</button>
+        <button id="change" @click="changeWallpaper()">Change Wallpaper</button>
       </div>
 
-      <button @click="autoRefresh = !autoRefresh">{{ autoRefresh ? "Stop" : "Start" }}</button>
+      <div class="update">
+        <input
+          id="interval"
+          placeholder="seconds"
+          v-model="refreshInterval"
+          type="text"
+        />
+        <button id="refresh" @click="autoRefresh = !autoRefresh">
+          {{ autoRefresh ? "Stop" : "Start" }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -35,24 +53,29 @@ export default {
   },
   data() {
     return {
-      subreddit: "aww",
-      scale: "Fit",
+      scales: ["Auto", "Fit", "Fill", "Stretch", "Center"],
+      scale: "Auto",
+      subreddit: "wallpapers",
       response: {},
       picturelist: {
         pictures: [],
         pictureCount: 0
       },
-      autoRefresh: false
+      autoRefresh: false,
+      refreshInterval: 60
     };
   },
   methods: {
     grabImages() {
       //electron.ipcRenderer.send("grabImages", this.subreddit);
-      var that = this;
       electron.ipcRenderer.send("grab-images", {
         subreddit: this.subreddit,
         scale: this.scale
       });
+    },
+    changeWallpaper() {
+      this.autoRefresh = false;
+      this.grabImages();
     }
   },
   watch: {
@@ -61,11 +84,17 @@ export default {
         // it seems to me this additional check would make sense?
         timer = window.setInterval(() => {
           this.grabImages();
-        }, 60 * 1000);
+        }, this.refreshInterval * 1000);
       } else {
         window.clearInterval(timer);
         timer = null;
       }
+    },
+    subreddit() {
+      this.autoRefresh = false;
+    },
+    refreshInterval() {
+      this.autoRefresh = false;
     }
   },
   created() {
@@ -93,6 +122,7 @@ body {
   padding: 0;
   margin: 0;
   font-family: "Calibre", sans-serif;
+  font-size: 16px;
 }
 #app {
   -webkit-font-smoothing: antialiased;
@@ -107,17 +137,45 @@ body {
     padding: 10px;
   }
 
-  input {
-    background-color: transparent;
-    border: none;
-    color: #eee;
-    border-bottom: 2px solid #ffcb6b;
-    outline: none;
+  .segmented-control {
     margin-bottom: 10px;
-    padding: 10px;
-    background-color: lighten(#090b10, 10);
-    border-radius: 3px;
-    font-family: "Calibre", sans-serif;
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      justify-content: space-between;
+      border: 1px solid #ffcb6b;
+      border-radius: 3px;
+
+      li {
+        list-style-type: none;
+        width: 100%;
+        height: 36px;
+        line-height: 36px;
+        padding: 0 5px;
+        cursor: pointer;
+        color: #ffcb6b;
+
+        &:not(:last-child) {
+          border-right: 1px solid #ffcb6b;
+        }
+
+        &:hover {
+          background-color: rgba(#ffcb6b, 0.3);
+        }
+
+        &:active {
+          background-color: rgba(#ffcb6b, 0.5);
+        }
+
+        &.active {
+          background-color: rgba(#ffcb6b, 0.5);
+          font-weight: bold;
+        }
+      }
+    }
   }
 
   .fetch {
@@ -125,40 +183,58 @@ body {
     display: flex;
     justify-content: space-between;
     margin-bottom: 10px;
+  }
 
-    .select-wrapper {
-      width: 100%;
-      margin-right: 5px;
+  .update {
+    display: flex;
+  }
 
-      select {
-        width: 100%;
-        min-width: 100px;
-        max-height: 36px;
-        padding: 10px;
-        background-color: lighten(#090b10, 10);
-        border: none;
-        border-bottom: 2px solid #ffcb6b;
-        border-radius: 3px;
-        color: #eee;
-        outline: none;
-        font-family: "Calibre", sans-serif;
-      }
+  input {
+    height: 34px;
+    max-height: 36px;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    padding: 0 10px;
+    background-color: lighten(#090b10, 10);
+    border-radius: 3px;
+    font-family: "Calibre", sans-serif;
+    font-size: 1rem;
 
-      button {
-        margin-left: 5px;
-      }
+    &#subs {
+      color: #82aaff;
+      border: 1px solid #82aaff;
+      margin-bottom: 10px;
+    }
+
+    &#interval {
+      color: #f78c6c;
+      border: 1px solid #f78c6c;
+      max-width: 55px;
+      margin-right: 10px;
     }
   }
+
   button {
     height: 36px;
     max-height: 36px;
     width: 100%;
-    border: 2px solid #ffcb6b;
+    color: #eee;
     border-radius: 3px;
     background-color: lighten(#090b10, 10);
-    color: #ffcb6b;
     font-family: "Calibre", sans-serif;
+    font-size: 1rem;
     outline: none;
+
+    &#change {
+      border: 1px solid #c3e88d;
+      color: #c3e88d;
+    }
+
+    &#refresh {
+      border: 1px solid #f78c6c;
+      color: #f78c6c;
+    }
 
     &:hover {
       background-color: lighten(#090b10, 15);
@@ -166,6 +242,7 @@ body {
 
     &:active {
       border-radius: 5px;
+      transform: scale(0.99);
     }
   }
 }

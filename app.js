@@ -4,7 +4,6 @@ const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 const path = require("path");
 const os = require("os");
-const fs = require("fs");
 const download = require("image-downloader");
 
 var wallpaper = require("wallpaper");
@@ -16,15 +15,15 @@ if (process.env.NODE_ENV === "DEV") {
   url = `file://${process.cwd()}/dist/index.html`;
 }
 
-url = "http://localhost:8080/";
+//url = "http://localhost:8080/";
 
 let mainWindow;
 let backgroundWindow;
 
 app.on("ready", () => {
   const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
-  winWidth = 300;
-  winHeight = 500;
+  let winWidth = 300;
+  let winHeight = 500;
   mainWindow = new BrowserWindow({
     width: winWidth,
     height: winHeight,
@@ -32,7 +31,7 @@ app.on("ready", () => {
     y: height - winHeight - 20,
     frame: false,
     transparent: true,
-    titleBarStyle: process.platform == "darwin" ? "hiddenInset" : "default"
+    titleBarStyle: process.platform == "darwin" ? "hidden" : "default"
   });
   mainWindow.loadURL(url);
 
@@ -55,7 +54,7 @@ ipcMain.on("change-wallpaper", (event, args) => {
       url: args.link,
       dest: path.join(os.homedir(), "/Pictures/Wallpapers")
     })
-    .then(({ filename, image }) => {
+    .then(({ filename }) => {
       wallpaper.set(path.resolve(filename), {
         scale: args.scale.toLowerCase()
       });
