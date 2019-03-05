@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <HeaderBar />
+    <HeaderBar/>
     <div class="main-content">
       <input
         id="subs"
@@ -8,7 +8,7 @@
         v-model="subreddit"
         @change="autoRefresh = false"
         type="text"
-      />
+      >
       <div class="segmented-control">
         <ul>
           <li
@@ -16,9 +16,7 @@
             v-bind:key="s"
             :class="{ active: s == scale }"
             @click="scale = s"
-          >
-            {{ s }}
-          </li>
+          >{{ s }}</li>
         </ul>
       </div>
       <div class="fetch">
@@ -26,22 +24,20 @@
       </div>
 
       <div class="update">
-        <input
-          id="interval"
-          placeholder="seconds"
-          v-model="refreshInterval"
-          type="text"
-        />
-        <button id="refresh" @click="autoRefresh = !autoRefresh">
-          {{ autoRefresh ? "Stop" : "Start" }}
-        </button>
+        <input id="interval" placeholder="seconds" v-model="refreshInterval" type="text">
+        <button
+          id="refresh"
+          @click="autoRefresh = !autoRefresh"
+        >{{ autoRefresh ? "Stop" : "Start" }}</button>
       </div>
+      <Dropdown :selected="filter" :data="filterData" v-on:select="filter = $event"/>
     </div>
   </div>
 </template>
 
 <script>
 import HeaderBar from "@/components/HeaderBar";
+import Dropdown from "@/components/Dropdown";
 const electron = window.require("electron");
 
 var timer = null;
@@ -49,7 +45,8 @@ var timer = null;
 export default {
   name: "app",
   components: {
-    HeaderBar
+    HeaderBar,
+    Dropdown
   },
   data() {
     return {
@@ -62,7 +59,15 @@ export default {
         pictureCount: 0
       },
       autoRefresh: false,
-      refreshInterval: 60
+      refreshInterval: 60,
+      filter: "Hot",
+      filterData: [
+        { name: "Hot", icon: "burn" },
+        { name: "New", icon: "certificate" },
+        { name: "Controversial", icon: "bolt" },
+        { name: "Top", icon: "arrow-up" },
+        { name: "Rising", icon: "chart-line" }
+      ]
     };
   },
   methods: {
@@ -144,15 +149,14 @@ body {
       list-style-type: none;
       padding: 0;
       margin: 0;
-      display: flex;
-      justify-content: space-between;
       border: 1px solid #ffcb6b;
       border-radius: 3px;
+      display: flex;
 
       li {
         list-style-type: none;
-        width: 100%;
         height: 36px;
+        flex: 1;
         line-height: 36px;
         padding: 0 5px;
         cursor: pointer;

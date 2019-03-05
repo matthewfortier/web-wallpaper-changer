@@ -16,7 +16,7 @@ if (process.env.NODE_ENV === "DEV") {
 }
 
 console.log(url);
-//url = "http://localhost:8080/";
+url = "http://localhost:8080/";
 
 let mainWindow;
 let backgroundWindow;
