@@ -12,9 +12,10 @@ let url;
 if (process.env.NODE_ENV === "DEV") {
   url = "http://localhost:8080/";
 } else {
-  url = `file://${process.cwd()}/dist/index.html`;
+  url = `file://${__dirname}/dist/index.html`;
 }
 
+console.log(url);
 //url = "http://localhost:8080/";
 
 let mainWindow;
@@ -39,8 +40,11 @@ app.on("ready", () => {
 });
 
 function createBackgroundProcess() {
-  var background = new BrowserWindow({ show: false });
-  background.loadURL(`file://${process.cwd()}/background.html`);
+  var background = new BrowserWindow({
+    show: process.env.NODE_ENV === "DEV" ? true : false
+  });
+  background.loadURL(`file://${__dirname}/background.html`);
+  background.webContents.openDevTools();
   return background;
 }
 
@@ -56,7 +60,8 @@ ipcMain.on("change-wallpaper", (event, args) => {
     })
     .then(({ filename }) => {
       wallpaper.set(path.resolve(filename), {
-        scale: args.scale.toLowerCase()
+        scale: args.scale.toLowerCase(),
+        screen: "all"
       });
     });
 });

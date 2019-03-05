@@ -1,6 +1,9 @@
 <template>
   <div class="header-bar">
-    <div v-bind:class="(os == 'darwin' && !maximized) ? 'darwin' : ''" class="left"></div>
+    <div
+      v-bind:class="os == 'darwin' && !maximized ? 'darwin' : ''"
+      class="left"
+    ></div>
     <div class="center"></div>
     <div class="right">
       <div v-if="os == 'win32'" class="windows-buttons">
@@ -19,7 +22,6 @@
 </template>
 
 <script>
-const { ipcRenderer } = window.require("electron");
 const BrowserWindow = window.require("electron").remote.BrowserWindow;
 export default {
   name: "HeaderBar",

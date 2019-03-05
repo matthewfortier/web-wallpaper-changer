@@ -12,8 +12,9 @@
         reddit
             .top(subreddit.trim())
             .t('all')
-            .limit(500)
+            .limit(1000)
             .fetch(res => {
+                console.log(res.data.children);
                 var image =
                     res.data.children[
                         Math.floor(Math.random() * res.data.children.length)
