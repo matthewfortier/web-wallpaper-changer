@@ -2,13 +2,26 @@
   <div id="app">
     <HeaderBar/>
     <div class="main-content">
-      <input
-        id="subs"
-        placeholder="subreddits"
-        v-model="subreddit"
-        @change="autoRefresh = false"
-        type="text"
-      >
+      <div class="reddit">
+        <input
+          id="subs"
+          placeholder="subreddits"
+          v-model="subreddit"
+          @change="autoRefresh = false"
+          type="text"
+        >
+      </div>
+      <div class="reddit">
+        <Dropdown :selected="0" :data="filterData" v-on:select="filter = $event"/>
+        <Dropdown
+          class="subFilter"
+          v-if="filter == 'Controversial' || filter == 'Top'"
+          :selected="0"
+          :data="subFilterData"
+          v-on:select="subFilter = $event"
+        />
+        <input id="count" placeholder="#" v-model="count" @change="autoRefresh = false" type="text">
+      </div>
       <div class="segmented-control">
         <ul>
           <li
@@ -30,7 +43,6 @@
           @click="autoRefresh = !autoRefresh"
         >{{ autoRefresh ? "Stop" : "Start" }}</button>
       </div>
-      <Dropdown :selected="filter" :data="filterData" v-on:select="filter = $event"/>
     </div>
   </div>
 </template>
@@ -53,6 +65,7 @@ export default {
       scales: ["Auto", "Fit", "Fill", "Stretch", "Center"],
       scale: "Auto",
       subreddit: "wallpapers",
+      count: 100,
       response: {},
       picturelist: {
         pictures: [],
@@ -67,7 +80,16 @@ export default {
         { name: "Controversial", icon: "bolt" },
         { name: "Top", icon: "arrow-up" },
         { name: "Rising", icon: "chart-line" }
-      ]
+      ],
+      subFilterData: [
+        { name: "Hour", id: "hour" },
+        { name: "24 Hour", id: "day" },
+        { name: "Week", id: "week" },
+        { name: "Month", id: "month" },
+        { name: "Year", id: "year" },
+        { name: "All", id: "all" }
+      ],
+      subFilter: "hour"
     };
   },
   methods: {
@@ -75,7 +97,10 @@ export default {
       //electron.ipcRenderer.send("grabImages", this.subreddit);
       electron.ipcRenderer.send("grab-images", {
         subreddit: this.subreddit,
-        scale: this.scale
+        scale: this.scale,
+        filter: this.filter,
+        subFilter: this.subFilter,
+        count: this.count
       });
     },
     changeWallpaper() {
@@ -142,6 +167,54 @@ body {
     padding: 10px;
   }
 
+  .reddit {
+    display: flex;
+    margin-bottom: 10px;
+
+    .subFilter {
+      margin-left: 5px;
+    }
+    .dropdown {
+      width: 100%;
+      .dropdown-display {
+        border-color: #82aaff;
+        border-radius: 3px;
+        color: #82aaff;
+        height: 34px;
+        line-height: 36px;
+        padding: 0 10px;
+        border: 1px solid;
+        background-color: lighten(#090b10, 10);
+      }
+      ul {
+        background-color: lighten(#090b10, 10);
+        //border: 1px solid #82aaff;
+        border-radius: 3px;
+        margin-top: 5px;
+        min-width: 100%;
+        box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25),
+          0 10px 10px rgba(0, 0, 0, 0.22);
+
+        li {
+          height: 34px;
+          text-align: left;
+          line-height: 34px;
+          cursor: pointer;
+          padding: 0 10px;
+          white-space: nowrap;
+
+          &:not(:last-child) {
+            border-bottom: 1px solid #090b10;
+          }
+
+          &:hover {
+            background-color: lighten(#090b10, 20);
+          }
+        }
+      }
+    }
+  }
+
   .segmented-control {
     margin-bottom: 10px;
 
@@ -205,17 +278,22 @@ body {
     font-family: "Calibre", sans-serif;
     font-size: 1rem;
 
-    &#subs {
+    &#subs,
+    &#count {
       color: #82aaff;
       border: 1px solid #82aaff;
-      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    &#count {
+      margin-left: 5px;
     }
 
     &#interval {
       color: #f78c6c;
       border: 1px solid #f78c6c;
       max-width: 55px;
-      margin-right: 10px;
+      margin-right: 5px;
     }
   }
 

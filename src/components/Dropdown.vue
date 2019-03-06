@@ -1,9 +1,13 @@
 <template>
-  <div class="dropdown">
-    <span @click="open = !open">{{ selected }}</span>
-    <ul :class="{ hidden: open == false }">
-      <li v-for="filter in data" v-bind:key="filter.name" @click="select(filter.name)">
-        <font-awesome-icon :icon="filter.icon"></font-awesome-icon>
+  <div class="dropdown" @click="toggle" v-click-outside="close">
+    <div class="dropdown-display">
+      <font-awesome-icon v-if="current.icon" class="icon" :icon="current.icon"></font-awesome-icon>
+      <span class="label">{{ current.name }}</span>
+      <font-awesome-icon class="chevron" :class="{ flip: visible == true }" icon="chevron-down"></font-awesome-icon>
+    </div>
+    <ul class="list" :class="{ hidden: visible == false }">
+      <li v-for="filter in data" v-bind:key="filter.name" @click="select(filter)">
+        <font-awesome-icon v-if="filter.icon" :icon="filter.icon"></font-awesome-icon>
         {{ filter.name }}
       </li>
     </ul>
@@ -15,7 +19,7 @@ export default {
   name: "dropdown",
   props: {
     selected: {
-      type: String,
+      type: Number,
       required: true
     },
     data: {
@@ -25,30 +29,112 @@ export default {
   },
   data() {
     return {
-      open: false
+      visible: false,
+      current: this.data[this.selected]
     };
   },
   methods: {
     select: function(li) {
-      this.open = false;
-      this.$emit("select", li);
+      this.current = li;
+      this.$emit("select", li.id || li.name);
+    },
+    open: function() {
+      this.visible = true;
+    },
+    toggle: function() {
+      this.visible = !this.visible;
+    },
+    close: function() {
+      this.visible = false;
+    }
+  },
+  directives: {
+    "click-outside": {
+      bind: function(el, binding, vNode) {
+        // Provided expression must evaluate to a function.
+        if (typeof binding.value !== "function") {
+          const compName = vNode.context.name;
+          let warn = `[Vue-click-outside:] provided expression '${
+            binding.expression
+          }' is not a function, but has to be`;
+          if (compName) {
+            warn += `Found in component '${compName}'`;
+          }
+
+          console.warn(warn);
+        }
+        // Define Handler and cache it on the element
+        const bubble = binding.modifiers.bubble;
+        const handler = e => {
+          if (bubble || (!el.contains(e.target) && el !== e.target)) {
+            binding.value(e);
+          }
+        };
+        el.__vueClickOutside__ = handler;
+
+        // add Event Listeners
+        document.addEventListener("click", handler);
+      },
+
+      unbind: function(el) {
+        // Remove Event Listeners
+        document.removeEventListener("click", el.__vueClickOutside__);
+        el.__vueClickOutside__ = null;
+      }
+    }
+  },
+  events: {
+    closeEvent: function() {
+      console.log("close event called");
+      this.close();
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-ul {
-  display: block;
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-  transition: height 0.5s ease-in-out;
+.dropdown {
+  position: relative;
+  &-display {
+    display: flex;
+    text-align: left;
+    cursor: pointer;
 
-  &.hidden {
-    height: 0px;
+    .icon {
+      height: 100%;
+    }
+
+    .label {
+      user-select: none;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 5px;
+    }
+
+    .chevron {
+      height: 100%;
+
+      &.flip {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
     transition: height 0.5s ease-in-out;
+    position: absolute;
+    min-width: 100;
+
+    &.hidden {
+      height: 0px;
+      transition: height 0.5s ease-in-out;
+    }
   }
 }
 </style>

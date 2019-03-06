@@ -41,7 +41,7 @@ app.on("ready", () => {
 
 function createBackgroundProcess() {
   var background = new BrowserWindow({
-    show: process.env.NODE_ENV === "DEV" ? true : false
+    show: true //process.env.NODE_ENV === "DEV" ? true : false
   });
   background.loadURL(`file://${__dirname}/background.html`);
   background.webContents.openDevTools();

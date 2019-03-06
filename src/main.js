@@ -8,6 +8,7 @@ import { faCertificate } from "@fortawesome/free-solid-svg-icons";
 import { faBolt } from "@fortawesome/free-solid-svg-icons";
 import { faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { faChartLine } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 library.add(faBurn);
@@ -15,6 +16,7 @@ library.add(faCertificate);
 library.add(faBolt);
 library.add(faChartLine);
 library.add(faArrowUp);
+library.add(faChevronDown);
 
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 
