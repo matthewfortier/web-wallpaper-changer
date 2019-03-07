@@ -1,5 +1,5 @@
 # reddit-wallpaper-changer
-
+![Imgur](https://i.imgur.com/X74sefm.png)
 ## Project setup
 ```
 yarn install
