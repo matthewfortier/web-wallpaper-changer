@@ -1,108 +1,116 @@
 <h2>Background</h2>
 
 <script>
-  const { ipcRenderer } = require("electron");
-  require("reddit.js");
+    const { ipcRenderer } = require('electron');
+    const Store = require('electron-store');
+    const store = new Store();
+    require('reddit.js');
 
-  ipcRenderer.on("sub", (event, args) => {
-    var subs = args.subreddit.split(",");
-    console.log(subs);
-    var subreddit = subs[Math.floor(Math.random() * subs.length)];
+    ipcRenderer.on('sub', (event, args) => {
+        var subs = args.subreddit.split(',');
+        console.log(subs);
+        var subreddit = subs.random();
+        args['chosen'] = subreddit;
 
-    switch (args.filter) {
-      case "Top":
-        sendTopResults(subreddit.trim(), args);
-        break;
-      case "Hot":
-        sendHotResults(subreddit.trim(), args);
-        break;
-      case "Controversial":
-        sendControversialResults(subreddit.trim(), args);
-        break;
-      case "New":
-        sendNewResults(subreddit.trim(), args);
-        break;
-      case "Rising":
-        sendRisingResults(subreddit.trim(), args);
-        break;
+        switch (args.filter) {
+            case 'Top':
+                sendTopResults(subreddit.trim(), args);
+                break;
+            case 'Hot':
+                sendHotResults(subreddit.trim(), args);
+                break;
+            case 'Controversial':
+                sendControversialResults(subreddit.trim(), args);
+                break;
+            case 'New':
+                sendNewResults(subreddit.trim(), args);
+                break;
+            case 'Rising':
+                sendRisingResults(subreddit.trim(), args);
+                break;
+        }
+    });
+
+    function sendResults(res, args) {
+        console.log(res.data.children);
+        console.log(args.subFilter);
+
+        var children = filterOutHistory(res.data.children);
+        console.log(children);
+
+        if (children.some(child => isValidFormat(child.data.url))) {
+            var image = children.random();
+
+            while (!isValidFormat(image.data.url)) {
+                console.log('While');
+                image = children.random();
+            }
+
+            console.log(image.data.url);
+            console.log(image.data.title);
+            ipcRenderer.send('change-wallpaper', {
+                link: image.data.url,
+                scale: args.scale,
+                subreddit: args.chosen
+            });
+        }
     }
-  });
 
-  function sendResults(res, args) {
-    console.log(res.data.children);
-    console.log(args.subFilter);
-
-    var formats = ["jpeg", "jpg", "tiff", "png", "bmp", "gif"];
-
-    if (
-      res.data.children.some(child =>
-        formats.includes(
-          child.data.url
-            .split(".")
-            .pop()
-            .toLowerCase()
-        )
-      )
-    ) {
-      var image =
-        res.data.children[Math.floor(Math.random() * res.data.children.length)];
-
-      while (
-        formats.includes(
-          image.data.url
-            .split(".")
-            .pop()
-            .toLowerCase()
-        ) == false
-      ) {
-        console.log("While");
-        image =
-          res.data.children[
-            Math.floor(Math.random() * res.data.children.length)
-          ];
-      }
-
-      ipcRenderer.send("change-wallpaper", {
-        link: image.data.url,
-        scale: args.scale
-      });
+    function sendTopResults(subreddit, args) {
+        reddit
+            .top(subreddit)
+            .t(args.subFilter)
+            .limit(parseInt(args.count))
+            .fetch(res => sendResults(res, args));
     }
-  }
 
-  function sendTopResults(subreddit, args) {
-    reddit
-      .top(subreddit)
-      .t(args.subFilter)
-      .limit(parseInt(args.count))
-      .fetch(res => sendResults(res, args));
-  }
+    function sendHotResults(subreddit, args) {
+        reddit
+            .hot(subreddit)
+            .limit(parseInt(args.count))
+            .fetch(res => sendResults(res, args));
+    }
 
-  function sendHotResults(subreddit, args) {
-    reddit
-      .hot(subreddit)
-      .limit(parseInt(args.count))
-      .fetch(res => sendResults(res, args));
-  }
+    function sendControversialResults(subreddit, args) {
+        reddit
+            .controversial(subreddit)
+            .t(args.subFilter)
+            .limit(parseInt(args.count))
+            .fetch(res => sendResults(res, args));
+    }
 
-  function sendControversialResults(subreddit, args) {
-    reddit
-      .controversial(subreddit)
-      .t(args.subFilter)
-      .limit(parseInt(args.count))
-      .fetch(res => sendResults(res, args));
-  }
+    function sendNewResults(subreddit, args) {
+        reddit
+            .new(subreddit)
+            .limit(parseInt(args.count))
+            .fetch(res => sendResults(res, args));
+    }
 
-  function sendNewResults(subreddit, args) {
-    reddit
-      .new(subreddit)
-      .limit(parseInt(args.count))
-      .fetch(res => sendResults(res, args));
-  }
+    function sendRisingResults(subreddit, args) {
+        reddit
+            .rising(subreddit)
+            .limit(parseInt(args.count))
+            .fetch(res => sendResults(res, args));
+    }
 
-  function sendRisingResults(subreddit, args) {
-    reddit
-      .rising(subreddit)
-      .limit(parseInt(args.count))
-      .fetch(res => sendResults(res, args));
-  }
+    function filterOutHistory(posts) {
+        var history = store.get('history');
+        if (!history) return posts;
+        history = history.map(img => img.link);
+        return posts.filter(value => !history.includes(value.data.url));
+    }
+
+    function isValidFormat(link) {
+        var formats = ['jpeg', 'jpg', 'tiff', 'png', 'bmp', 'gif'];
+        return formats.includes(
+            link
+                .split('.')
+                .pop()
+                .toLowerCase()
+        );
+    }
+
+    Array.prototype.random = function() {
+        return this[Math.floor(Math.random() * this.length)];
+    };
 </script>

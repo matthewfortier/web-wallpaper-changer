@@ -1,13 +1,28 @@
 <template>
   <div class="dropdown" @click="toggle" v-click-outside="close">
     <div class="dropdown-display">
-      <font-awesome-icon v-if="current.icon" class="icon" :icon="current.icon"></font-awesome-icon>
+      <font-awesome-icon
+        v-if="current.icon"
+        class="icon"
+        :icon="current.icon"
+      ></font-awesome-icon>
       <span class="label">{{ current.name }}</span>
-      <font-awesome-icon class="chevron" :class="{ flip: visible == true }" icon="chevron-down"></font-awesome-icon>
+      <font-awesome-icon
+        class="chevron"
+        :class="{ flip: visible == true }"
+        icon="chevron-down"
+      ></font-awesome-icon>
     </div>
     <ul class="list" :class="{ hidden: visible == false }">
-      <li v-for="filter in data" v-bind:key="filter.name" @click="select(filter)">
-        <font-awesome-icon v-if="filter.icon" :icon="filter.icon"></font-awesome-icon>
+      <li
+        v-for="filter in data"
+        v-bind:key="filter.name"
+        @click="select(filter)"
+      >
+        <font-awesome-icon
+          v-if="filter.icon"
+          :icon="filter.icon"
+        ></font-awesome-icon>
         {{ filter.name }}
       </li>
     </ul>
@@ -19,7 +34,7 @@ export default {
   name: "dropdown",
   props: {
     selected: {
-      type: Number,
+      type: String,
       required: true
     },
     data: {
@@ -30,7 +45,9 @@ export default {
   data() {
     return {
       visible: false,
-      current: this.data[this.selected]
+      current: this.data.find(
+        item => item.name == this.selected || item.id == this.selected
+      )
     };
   },
   methods: {
