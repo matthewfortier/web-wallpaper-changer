@@ -58,10 +58,6 @@ export default {
   user-select: none;
   background-color: #090b10;
   border-bottom: 1px solid #000;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1;
 
   .right {
     -webkit-app-region: no-drag;

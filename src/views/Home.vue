@@ -82,7 +82,7 @@ export default {
       refreshInterval: store.state.refreshInterval,
       filter: store.state.filter,
       subFilter: store.state.subFilter,
-      scales: ["Auto", "Fit", "Fill", "Stretch", "Center"],
+      scales: [],
       filterData: [
         { name: "Hot", icon: "burn" },
         { name: "New", icon: "certificate" },
@@ -110,6 +110,7 @@ export default {
         subFilter: this.subFilter,
         count: this.count
       });
+      console.log(electron.remote.process.platform)
     },
     changeWallpaper() {
       this.autoRefresh = false;
@@ -162,6 +163,14 @@ export default {
       state.set("state", store.state);
       electron.ipcRenderer.send("close");
     });
+  },
+  created() {
+     console.log(electron.remote.process.platform)
+    if (electron.remote.process.platform === "win32") {
+      this.scales = ["Fit", "Fill", "Span", "Stretch", "Center", "Tile"];
+    } else {
+      this.scales = ["Auto", "Fit", "Fill", "Stretch", "Center"];
+    }
   },
   beforeDestroy() {
     state.set("state", store.state);

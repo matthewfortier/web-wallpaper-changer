@@ -6,6 +6,7 @@ const path = require("path");
 const os = require("os");
 const fs = require("fs");
 const del = require("del");
+const Registry = require('winreg')
 const download = require("image-downloader");
 const Store = require("electron-store");
 const store = new Store();
@@ -86,6 +87,46 @@ function createSubredditDirectory(subreddit) {
   }
 }
 
+function setWindowsWallpaperFit(fit) {
+  let regKey = new Registry({                                       // new operator is optional
+    hive: Registry.HKCU,                                        // open registry hive HKEY_CURRENT_USER
+    key:  '\\Control Panel\\Desktop' // key containing autostart programs
+  });
+
+  let tile = "0";
+  let style = "0";
+
+  switch(fit) {
+    case "tile":
+      style = "0"
+      tile = "1"
+      break;
+    case "center":
+      style = "0";
+      break;
+    case "stretch":
+      style = "2";
+      break;
+    case "fill":
+      style = "10";
+      break;
+    case "fit":
+      style = "6";
+      break;
+    case "span":
+      style = "22";
+      break;
+    default:
+      style = "0";
+  }
+
+  console.log(fit)
+  console.log(style);
+  console.log(tile);
+  regKey.set("WallpaperStyle", "REG_SZ", style, () => {});
+  regKey.set("TileWallpaper", "REG_SZ", tile, () => {});
+}
+
 ipcMain.on("close", () => {
   console.log("Close");
   app.quit();
@@ -136,17 +177,15 @@ ipcMain.on("change-wallpaper", (event, args) => {
       dest: path.join(os.homedir(), `${directory}/${args.subreddit}`)
     })
     .then(({ filename }) => {
+      if(process.platform == "win32") {
+        setWindowsWallpaperFit(args.scale.toLowerCase());
+      }
+      
       wallpaper.set(path.resolve(filename), {
         scale: args.scale.toLowerCase()
       });
-      addLinkToHistory({ link: args.link, sub: args.subreddit });
 
-      (async () => {
-        var filename = await wallpaper.get();
-        //=> '/Users/sindresorhus/unicorn.jpg'
-        console.log(filename);
-      })();
-      wallpaper.get(filename => console.log(filename));
+      addLinkToHistory({ link: args.link, sub: args.subreddit });
     })
     .catch(err => {
       console.log(err);

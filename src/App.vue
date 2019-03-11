@@ -36,17 +36,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #dce0e4;
-  margin-top: 48px;
 
   .router-links {
     display: flex;
     list-style-type: none;
     background-color: lighten(#090b10, 10);
     width: 100%;
-    position: fixed;
-    top: 24px;
-    left: 0;
-    z-index: 1;
 
     .router-link-exact-active {
       background-color: #090b10;
