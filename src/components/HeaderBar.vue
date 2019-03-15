@@ -1,17 +1,11 @@
 <template>
   <div class="header-bar">
-    <div
-      v-bind:class="os == 'darwin' && !maximized ? 'darwin' : ''"
-      class="left"
-    ></div>
+    <div v-bind:class="os == 'darwin' && !maximized ? 'darwin' : ''" class="left"></div>
     <div class="center"></div>
     <div class="right">
       <div v-if="os == 'win32'" class="windows-buttons">
         <div @click="minimize" class="windows-icon-bg">
           <div id="minimize"></div>
-        </div>
-        <div @click="maximize" class="windows-icon-bg">
-          <div id="maximize"></div>
         </div>
         <div @click="close" class="windows-icon-bg">
           <div id="close"></div>
@@ -33,10 +27,6 @@ export default {
   methods: {
     minimize: () => {
       BrowserWindow.getFocusedWindow().minimize();
-    },
-    maximize: () => {
-      var win = BrowserWindow.getFocusedWindow();
-      win.isMaximized() ? win.unmaximize() : win.maximize();
     },
     close: () => {
       BrowserWindow.getFocusedWindow().close();

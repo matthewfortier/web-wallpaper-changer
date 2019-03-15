@@ -1,19 +1,10 @@
 <template>
   <div class="main-content">
     <div class="reddit">
-      <input
-        id="subs"
-        placeholder="subreddits"
-        v-model="subreddit"
-        type="text"
-      />
+      <input id="subs" placeholder="subreddits" v-model="subreddit" type="text">
     </div>
     <div class="reddit">
-      <Dropdown
-        :selected="filter"
-        :data="filterData"
-        v-on:select="filter = $event"
-      />
+      <Dropdown :selected="filter" :data="filterData" v-on:select="filter = $event"/>
       <Dropdown
         class="subFilter"
         v-if="filter == 'Controversial' || filter == 'Top'"
@@ -21,13 +12,7 @@
         :data="subFilterData"
         v-on:select="subFilter = $event"
       />
-      <input
-        id="count"
-        placeholder="#"
-        v-model="count"
-        @change="autoRefresh = false"
-        type="text"
-      />
+      <input id="count" placeholder="#" v-model="count" @change="autoRefresh = false" type="text">
     </div>
     <div class="segmented-control">
       <ul>
@@ -36,9 +21,7 @@
           v-bind:key="s"
           :class="{ active: s == scale }"
           @click="scale = s"
-        >
-          {{ s }}
-        </li>
+        >{{ s }}</li>
       </ul>
     </div>
     <div class="fetch">
@@ -46,15 +29,8 @@
     </div>
 
     <div class="update">
-      <input
-        id="interval"
-        placeholder="seconds"
-        v-model="refreshInterval"
-        type="text"
-      />
-      <button id="refresh" @click="toggleRefresh()">
-        {{ autoRefresh ? "Stop" : "Start" }}
-      </button>
+      <input id="interval" placeholder="seconds" v-model="refreshInterval" type="text">
+      <button id="refresh" @click="toggleRefresh()">{{ autoRefresh ? "Stop" : "Start" }}</button>
     </div>
   </div>
 </template>
@@ -110,7 +86,7 @@ export default {
         subFilter: this.subFilter,
         count: this.count
       });
-      console.log(electron.remote.process.platform)
+      console.log(electron.remote.process.platform);
     },
     changeWallpaper() {
       this.autoRefresh = false;
@@ -121,6 +97,11 @@ export default {
     },
     sendState() {
       state.set("state", store.state);
+    },
+    setRefreshInterval() {
+      timer = window.setInterval(() => {
+        this.grabImages();
+      }, this.refreshInterval * 1000);
     }
   },
   watch: {
@@ -159,18 +140,33 @@ export default {
   beforeCreate() {
     if (state.get("state")) store.setState(state.get("state"));
 
+    electron.ipcRenderer.on("hide", () => {
+      state.set("state", store.state);
+      //electron.ipcRenderer.send("close");
+    });
+
     electron.ipcRenderer.on("close", () => {
       state.set("state", store.state);
       electron.ipcRenderer.send("close");
     });
   },
   created() {
-     console.log(electron.remote.process.platform)
+    console.log(electron.remote.process.platform);
     if (electron.remote.process.platform === "win32") {
       this.scales = ["Fit", "Fill", "Span", "Stretch", "Center", "Tile"];
     } else {
       this.scales = ["Auto", "Fit", "Fill", "Stretch", "Center"];
     }
+  },
+  mounted() {
+    if (store.state.autoRefresh) {
+      this.setRefreshInterval();
+    }
+
+    electron.ipcRenderer.on("next", () => {
+      console.log("Next");
+      this.changeWallpaper();
+    });
   },
   beforeDestroy() {
     state.set("state", store.state);
