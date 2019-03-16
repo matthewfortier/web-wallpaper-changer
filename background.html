@@ -53,6 +53,12 @@
                 scale: args.scale,
                 subreddit: args.chosen
             });
+        } else {
+            console.log('No Results');
+            ipcRenderer.send(
+                'alert',
+                'No results, try another filter combination'
+            );
         }
     }
 

@@ -1,13 +1,15 @@
 <template>
   <div class="history">
     <button id="clear-history" @click="clearHistory()">Clear History</button>
-    <div
-      class="history-image"
-      v-for="(img, index) in images.slice(1)"
-      :key="index"
-      @click="changeWallpaper(img)"
-    >
-      <v-lazy-image :src="img.link" />
+    <div class="images">
+      <div
+        class="history-image"
+        v-for="(img, index) in images.slice(1)"
+        :key="index"
+        @click="changeWallpaper(img)"
+      >
+        <v-lazy-image :src="img.link" />
+      </div>
     </div>
   </div>
 </template>
@@ -57,12 +59,17 @@ export default {
   flex-direction: column;
   justify-content: center;
 
+  .images {
+    height: calc(100vh - 49px);
+    overflow: auto;
+  }
+
   #clear-history {
     position: fixed;
-    height: 20px;
+    height: 24px;
     width: 100px;
     right: 0px;
-    top: 26px;
+    top: 25px;
     border: none;
     padding: 0px;
     z-index: 1;

@@ -10,15 +10,18 @@
       </router-link>
     </div>
     <router-view></router-view>
+    <FooterBar />
   </div>
 </template>
 
 <script>
 import HeaderBar from "@/components/HeaderBar";
+import FooterBar from "@/components/FooterBar";
 export default {
   name: "app",
   components: {
-    HeaderBar
+    HeaderBar,
+    FooterBar
   }
 };
 </script>
@@ -30,26 +33,25 @@ body {
   margin: 0;
   font-family: "Calibre", sans-serif;
   font-size: 16px;
+  overflow: hidden;
 }
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #dce0e4;
-  margin-top: 48px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 
   .router-links {
     display: flex;
     list-style-type: none;
     background-color: lighten(#090b10, 10);
     width: 100%;
-    position: fixed;
-    top: 24px;
-    left: 0;
-    z-index: 1;
 
     .router-link-exact-active {
-      background-color: #090b10;
+      background-color: #0f111a;
     }
 
     li {

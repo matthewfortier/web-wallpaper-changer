@@ -10,9 +10,6 @@
         <div @click="minimize" class="windows-icon-bg">
           <div id="minimize"></div>
         </div>
-        <div @click="maximize" class="windows-icon-bg">
-          <div id="maximize"></div>
-        </div>
         <div @click="close" class="windows-icon-bg">
           <div id="close"></div>
         </div>
@@ -34,10 +31,6 @@ export default {
     minimize: () => {
       BrowserWindow.getFocusedWindow().minimize();
     },
-    maximize: () => {
-      var win = BrowserWindow.getFocusedWindow();
-      win.isMaximized() ? win.unmaximize() : win.maximize();
-    },
     close: () => {
       BrowserWindow.getFocusedWindow().close();
     }
@@ -58,10 +51,6 @@ export default {
   user-select: none;
   background-color: #090b10;
   border-bottom: 1px solid #000;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1;
 
   .right {
     -webkit-app-region: no-drag;

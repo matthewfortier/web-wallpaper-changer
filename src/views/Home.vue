@@ -82,7 +82,7 @@ export default {
       refreshInterval: store.state.refreshInterval,
       filter: store.state.filter,
       subFilter: store.state.subFilter,
-      scales: ["Auto", "Fit", "Fill", "Stretch", "Center"],
+      scales: [],
       filterData: [
         { name: "Hot", icon: "burn" },
         { name: "New", icon: "certificate" },
@@ -110,6 +110,7 @@ export default {
         subFilter: this.subFilter,
         count: this.count
       });
+      console.log(electron.remote.process.platform);
     },
     changeWallpaper() {
       this.autoRefresh = false;
@@ -120,6 +121,11 @@ export default {
     },
     sendState() {
       state.set("state", store.state);
+    },
+    setRefreshInterval() {
+      timer = window.setInterval(() => {
+        this.grabImages();
+      }, this.refreshInterval * 1000);
     }
   },
   watch: {
@@ -158,9 +164,32 @@ export default {
   beforeCreate() {
     if (state.get("state")) store.setState(state.get("state"));
 
+    electron.ipcRenderer.on("hide", () => {
+      state.set("state", store.state);
+      //electron.ipcRenderer.send("close");
+    });
+
     electron.ipcRenderer.on("close", () => {
       state.set("state", store.state);
       electron.ipcRenderer.send("close");
+    });
+  },
+  created() {
+    console.log(electron.remote.process.platform);
+    if (electron.remote.process.platform === "win32") {
+      this.scales = ["Fit", "Fill", "Span", "Stretch", "Center", "Tile"];
+    } else {
+      this.scales = ["Auto", "Fit", "Fill", "Stretch", "Center"];
+    }
+  },
+  mounted() {
+    if (store.state.autoRefresh) {
+      this.setRefreshInterval();
+    }
+
+    electron.ipcRenderer.on("next", () => {
+      console.log("Next");
+      this.changeWallpaper();
     });
   },
   beforeDestroy() {
@@ -185,13 +214,34 @@ export default {
 .main-content {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   padding: 10px;
+  flex: 1;
 }
 
-.reddit {
-  display: flex;
+section {
   margin-bottom: 10px;
+}
+
+label {
+  text-align: left;
+  margin-bottom: 5px;
+  font-weight: bold;
+
+  &#subs-label {
+    color: #82aaff;
+  }
+
+  &#scales-label {
+    color: #ffcb6b;
+  }
+
+  &#refresh-label {
+    color: #f78c6c;
+  }
+}
+
+#reddit {
+  display: flex;
 
   .subFilter {
     margin-left: 5px;
@@ -237,9 +287,7 @@ export default {
   }
 }
 
-.segmented-control {
-  margin-bottom: 10px;
-
+#segmented-control {
   ul {
     list-style-type: none;
     padding: 0;
@@ -277,14 +325,13 @@ export default {
   }
 }
 
-.fetch {
+#fetch {
   width: 100%;
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
 }
 
-.update {
+#update {
   display: flex;
 }
 

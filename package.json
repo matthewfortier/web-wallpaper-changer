@@ -29,7 +29,8 @@
         "vue": "^2.6.6",
         "vue-electron": "^1.0.6",
         "vue-router": "^3.0.1",
-        "wallpaper": "^4.2.0"
+        "wallpaper": "^4.2.0",
+        "winreg": "^1.2.4"
     },
     "devDependencies": {
         "@fortawesome/fontawesome-free": "^5.7.2",
@@ -38,7 +39,7 @@
         "@vue/cli-service": "^3.4.0",
         "@vue/eslint-config-prettier": "^4.0.1",
         "babel-eslint": "^10.0.1",
-        "electron": "^4.0.7",
+        "electron": "^4.0.8",
         "electron-packager": "^13.1.0",
         "eslint": "^5.8.0",
         "eslint-config-prettier": "^4.1.0",

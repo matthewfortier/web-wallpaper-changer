@@ -2,19 +2,20 @@ const electron = require("electron");
 const ipcMain = electron.ipcMain;
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
+const Menu = electron.Menu;
+const Tray = electron.Tray;
 const path = require("path");
 const os = require("os");
 const fs = require("fs");
 const del = require("del");
+const Registry = require("winreg");
 const download = require("image-downloader");
 const Store = require("electron-store");
 const store = new Store();
 
 const directory = "/Pictures/Wallpapers";
 
-var wallpaper = require("wallpaper");
-
-var closePressed = false;
+const wallpaper = require("wallpaper");
 
 let url;
 if (process.env.NODE_ENV === "DEV") {
@@ -24,14 +25,22 @@ if (process.env.NODE_ENV === "DEV") {
 }
 
 console.log(url);
-url = "http://localhost:8080/";
+//url = "http://localhost:8080/";
 
 let mainWindow;
 let backgroundWindow;
+let tray;
+let quit = false;
 
 app.on("ready", () => {
+  configureTray();
+  createMainWindow();
+  backgroundWindow = createBackgroundProcess();
+});
+
+function createMainWindow() {
   const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
-  let winWidth = 300;
+  let winWidth = 350;
   let winHeight = 500;
 
   mainWindow = new BrowserWindow({
@@ -39,26 +48,71 @@ app.on("ready", () => {
     height: winHeight,
     x: width - winWidth - 20,
     y: height - winHeight - 20,
+    show: false,
     frame: false,
     transparent: true,
     titleBarStyle: process.platform == "darwin" ? "hidden" : "default"
   });
 
+  // Intercept close and hide window instead
   mainWindow.on("close", e => {
-    if (!closePressed) {
+    if (!quit) {
       e.preventDefault();
-      closePressed = true;
+      mainWindow.hide();
+    } else {
       mainWindow.webContents.send("close");
     }
   });
 
+  mainWindow.on("show", () => {
+    tray.setHighlightMode("always");
+  });
+
+  mainWindow.on("hide", () => {
+    mainWindow.webContents.send("hide");
+    tray.setHighlightMode("never");
+  });
+
   mainWindow.loadURL(url);
-  backgroundWindow = createBackgroundProcess();
-});
+}
+
+function configureTray() {
+  tray = new Tray(`${__dirname}/src/assets/logo.png`);
+  const contextMenu = Menu.buildFromTemplate([
+    // { label: "✔️ Running", click: () => mainWindow.show() },
+    { type: "separator" },
+    {
+      label: "⏭️ Next Wallpaper",
+      click: () => mainWindow.webContents.send("next")
+    },
+    // {
+    //   label: "⏭️ Previous Wallpaper",
+    //   click: () => setPrevious()
+    // },
+    { type: "separator" },
+    // { label: "🌟 Star Current", click: () => mainWindow.show() },
+    // { label: "⛔ Blackist Current", click: () => mainWindow.show() },
+    // { type: "separator" },
+    { label: "Open", click: () => mainWindow.show() },
+    {
+      label: "Exit",
+      click: () => {
+        quit = true;
+        app.quit();
+      }
+    }
+  ]);
+  tray.setToolTip("Radiant Wallpaper Changer");
+  tray.setContextMenu(contextMenu);
+
+  tray.on("click", () =>
+    mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
+  );
+}
 
 function createBackgroundProcess() {
   var background = new BrowserWindow({
-    show: true //process.env.NODE_ENV === "DEV" ? true : false
+    show: false //process.env.NODE_ENV === "DEV" ? true : false
   });
   background.loadURL(`file://${__dirname}/background.html`);
   background.webContents.openDevTools();
@@ -86,9 +140,54 @@ function createSubredditDirectory(subreddit) {
   }
 }
 
+function setWindowsWallpaperFit(fit) {
+  let regKey = new Registry({
+    // new operator is optional
+    hive: Registry.HKCU, // open registry hive HKEY_CURRENT_USER
+    key: "\\Control Panel\\Desktop" // key containing autostart programs
+  });
+
+  let tile = "0";
+  let style = "0";
+
+  switch (fit) {
+    case "tile":
+      style = "0";
+      tile = "1";
+      break;
+    case "center":
+      style = "0";
+      break;
+    case "stretch":
+      style = "2";
+      break;
+    case "fill":
+      style = "10";
+      break;
+    case "fit":
+      style = "6";
+      break;
+    case "span":
+      style = "22";
+      break;
+    default:
+      style = "0";
+  }
+
+  console.log(fit);
+  console.log(style);
+  console.log(tile);
+  regKey.set("WallpaperStyle", "REG_SZ", style, () => {});
+  regKey.set("TileWallpaper", "REG_SZ", tile, () => {});
+}
+
 ipcMain.on("close", () => {
-  console.log("Close");
+  console.log("Quit");
   app.quit();
+});
+
+ipcMain.on("alert", (_, args) => {
+  mainWindow.webContents.send("alert", args);
 });
 
 ipcMain.on("get-history", () => {
@@ -103,18 +202,6 @@ ipcMain.on("clear-history", () => {
   del.sync([`${photoDir}/**`, `!${photoDir}`], {
     force: true
   });
-  /* fs.readdir(path.join(os.homedir(), `${directory}`), (err, files) => {
-    if (err) throw err;
-
-    for (const file of files) {
-      fs.unlink(
-        path.join(path.join(os.homedir(), `${directory}`), file),
-        err => {
-          if (err) throw err;
-        }
-      );
-    }
-  }); */
 });
 
 ipcMain.on("grab-images", (event, args) => {
@@ -136,17 +223,17 @@ ipcMain.on("change-wallpaper", (event, args) => {
       dest: path.join(os.homedir(), `${directory}/${args.subreddit}`)
     })
     .then(({ filename }) => {
+      if (process.platform == "win32") {
+        setWindowsWallpaperFit(args.scale.toLowerCase());
+      }
+
       wallpaper.set(path.resolve(filename), {
         scale: args.scale.toLowerCase()
       });
+
       addLinkToHistory({ link: args.link, sub: args.subreddit });
 
-      (async () => {
-        var filename = await wallpaper.get();
-        //=> '/Users/sindresorhus/unicorn.jpg'
-        console.log(filename);
-      })();
-      wallpaper.get(filename => console.log(filename));
+      mainWindow.webContents.send("alert", "Change Successful!");
     })
     .catch(err => {
       console.log(err);
