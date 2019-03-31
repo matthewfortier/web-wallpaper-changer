@@ -19,10 +19,12 @@
         v-bind:key="filter.name"
         @click="select(filter)"
       >
-        <font-awesome-icon
-          v-if="filter.icon"
-          :icon="filter.icon"
-        ></font-awesome-icon>
+        <div :class="filter.icon ? 'list-icon' : ''">
+          <font-awesome-icon
+            v-if="filter.icon"
+            :icon="filter.icon"
+          ></font-awesome-icon>
+        </div>
         {{ filter.name }}
       </li>
     </ul>
@@ -119,6 +121,7 @@ export default {
 
     .icon {
       height: 100%;
+      padding-right: 5px;
     }
 
     .label {
@@ -127,14 +130,16 @@ export default {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      padding: 0 5px;
     }
 
     .chevron {
       height: 100%;
+      padding-left: 5px;
 
       &.flip {
         transform: rotate(180deg);
+        padding-left: 0px;
+        padding-right: 5px;
       }
     }
   }
@@ -147,6 +152,14 @@ export default {
     transition: height 0.5s ease-in-out;
     position: absolute;
     min-width: 100;
+
+    li {
+      display: flex;
+    }
+
+    &-icon {
+      width: 22px;
+    }
 
     &.hidden {
       height: 0px;

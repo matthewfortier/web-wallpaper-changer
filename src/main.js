@@ -6,12 +6,20 @@ import { VLazyImagePlugin } from "v-lazy-image";
 Vue.use(VLazyImagePlugin);
 
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faBurn } from "@fortawesome/free-solid-svg-icons";
-import { faCertificate } from "@fortawesome/free-solid-svg-icons";
-import { faBolt } from "@fortawesome/free-solid-svg-icons";
-import { faArrowUp } from "@fortawesome/free-solid-svg-icons";
-import { faChartLine } from "@fortawesome/free-solid-svg-icons";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBurn,
+  faCertificate,
+  faBolt,
+  faArrowUp,
+  faChartLine,
+  faChevronDown,
+  faStar,
+  faMinusSquare,
+  faTrash
+} from "@fortawesome/free-solid-svg-icons";
+
+import { faMinusSquare as farMinusSquare } from "@fortawesome/free-regular-svg-icons";
+
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 library.add(faBurn);
@@ -20,6 +28,10 @@ library.add(faBolt);
 library.add(faChartLine);
 library.add(faArrowUp);
 library.add(faChevronDown);
+library.add(faStar);
+library.add(faMinusSquare);
+library.add(farMinusSquare);
+library.add(faTrash);
 
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 

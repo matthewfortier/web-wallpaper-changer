@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <HeaderBar />
+    <HeaderBar v-if="platform != 'darwin'" />
     <div class="router-links">
       <router-link tag="li" to="/">
         <a>Home</a>
@@ -8,8 +8,14 @@
       <router-link tag="li" to="/history">
         <a>History</a>
       </router-link>
+      <router-link tag="li" to="/favorites">
+        <a>Favorites</a>
+      </router-link>
+      <router-link tag="li" to="/blacklist">
+        <a>Blacklist</a>
+      </router-link>
     </div>
-    <router-view></router-view>
+    <router-view />
     <FooterBar />
   </div>
 </template>
@@ -17,16 +23,25 @@
 <script>
 import HeaderBar from "@/components/HeaderBar";
 import FooterBar from "@/components/FooterBar";
+
+const electron = window.require("electron");
+
 export default {
   name: "app",
   components: {
     HeaderBar,
     FooterBar
+  },
+  data() {
+    return {
+      platform: electron.remote.process.platform
+    };
   }
 };
 </script>
 
 <style lang="scss">
+@import url("https://cdn.jsdelivr.net/npm/animate.css@3.5.1");
 body {
   background-color: #0f111a;
   padding: 0;

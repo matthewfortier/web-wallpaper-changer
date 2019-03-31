@@ -1,14 +1,15 @@
 <template>
   <div class="main-content">
-    <div class="reddit">
+    <label id="subs-label" for="subs">Subreddit(s):</label>
+    <section id="reddit">
       <input
         id="subs"
         placeholder="subreddits"
         v-model="subreddit"
         type="text"
       />
-    </div>
-    <div class="reddit">
+    </section>
+    <section id="reddit">
       <Dropdown
         :selected="filter"
         :data="filterData"
@@ -28,8 +29,9 @@
         @change="autoRefresh = false"
         type="text"
       />
-    </div>
-    <div class="segmented-control">
+    </section>
+    <label id="scales-label" for="scales">Scale:</label>
+    <section id="segmented-control">
       <ul>
         <li
           v-for="s in scales"
@@ -40,12 +42,9 @@
           {{ s }}
         </li>
       </ul>
-    </div>
-    <div class="fetch">
-      <button id="change" @click="changeWallpaper()">Change Wallpaper</button>
-    </div>
-
-    <div class="update">
+    </section>
+    <label id="refresh-label" for="interval">Update:</label>
+    <section id="update">
       <input
         id="interval"
         placeholder="seconds"
@@ -55,7 +54,10 @@
       <button id="refresh" @click="toggleRefresh()">
         {{ autoRefresh ? "Stop" : "Start" }}
       </button>
-    </div>
+    </section>
+    <section id="fetch">
+      <button id="change" @click="changeWallpaper()">Next Wallpaper</button>
+    </section>
   </div>
 </template>
 
@@ -366,7 +368,7 @@ input {
   }
 }
 
-button {
+.main-content button {
   height: 36px;
   max-height: 36px;
   width: 100%;
@@ -376,6 +378,7 @@ button {
   font-family: "Calibre", sans-serif;
   font-size: 1rem;
   outline: none;
+  cursor: pointer;
 
   &#change {
     border: 1px solid #c3e88d;

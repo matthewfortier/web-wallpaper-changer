@@ -1,6 +1,9 @@
 import Vue from "vue";
 import Router from "vue-router";
 import Home from "./views/Home.vue";
+import History from "./views/History.vue";
+import Favorites from "./views/Favorites.vue";
+import Blacklist from "./views/Blacklist.vue";
 
 Vue.use(Router);
 
@@ -14,11 +17,17 @@ export default new Router({
     {
       path: "/history",
       name: "history",
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () =>
-        import(/* webpackChunkName: "about" */ "./views/History.vue")
+      component: History
+    },
+    {
+      path: "/favorites",
+      name: "favorites",
+      component: Favorites
+    },
+    {
+      path: "/blacklist",
+      name: "blacklist",
+      component: Blacklist
     }
   ]
 });

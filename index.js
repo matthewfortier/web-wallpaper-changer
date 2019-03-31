@@ -39,19 +39,23 @@ app.on("ready", () => {
 });
 
 function createMainWindow() {
-  const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
   let winWidth = 350;
   let winHeight = 500;
 
   mainWindow = new BrowserWindow({
     width: winWidth,
     height: winHeight,
-    x: width - winWidth - 20,
-    y: height - winHeight - 20,
     show: false,
     frame: false,
+    fullscreenable: false,
+    skipTaskbar: true,
+    resizable: false,
     transparent: true,
-    titleBarStyle: process.platform == "darwin" ? "hidden" : "default"
+    webPreferences: {
+      // Prevents renderer process code from not running when window is
+      // hidden
+      backgroundThrottling: false
+    }
   });
 
   // Intercept close and hide window instead
@@ -65,7 +69,7 @@ function createMainWindow() {
   });
 
   mainWindow.on("show", () => {
-    tray.setHighlightMode("always");
+    tray.setHighlightMode("selection");
   });
 
   mainWindow.on("hide", () => {
@@ -73,46 +77,96 @@ function createMainWindow() {
     tray.setHighlightMode("never");
   });
 
+  if (process.platform == "darwin") {
+    // Hide the window when it loses focus
+    mainWindow.on("blur", () => {
+      if (!mainWindow.webContents.isDevToolsOpened()) {
+        mainWindow.hide();
+      }
+    });
+
+    app.dock.hide();
+  }
+
   mainWindow.loadURL(url);
 }
 
-function configureTray() {
-  tray = new Tray(`${__dirname}/src/assets/logo.png`);
-  const contextMenu = Menu.buildFromTemplate([
-    // { label: "✔️ Running", click: () => mainWindow.show() },
-    { type: "separator" },
-    {
-      label: "⏭️ Next Wallpaper",
-      click: () => mainWindow.webContents.send("next")
-    },
-    // {
-    //   label: "⏭️ Previous Wallpaper",
-    //   click: () => setPrevious()
-    // },
-    { type: "separator" },
-    // { label: "🌟 Star Current", click: () => mainWindow.show() },
-    // { label: "⛔ Blackist Current", click: () => mainWindow.show() },
-    // { type: "separator" },
-    { label: "Open", click: () => mainWindow.show() },
-    {
-      label: "Exit",
-      click: () => {
-        quit = true;
-        app.quit();
-      }
-    }
-  ]);
-  tray.setToolTip("Radiant Wallpaper Changer");
-  tray.setContextMenu(contextMenu);
+const getWindowPosition = () => {
+  const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
+  const windowBounds = mainWindow.getBounds();
+  const trayBounds = tray.getBounds();
 
-  tray.on("click", () =>
-    mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
-  );
+  let x, y;
+
+  if (process.platform == "darwin") {
+    // Center window horizontally below the tray icon
+    x = Math.round(
+      trayBounds.x + trayBounds.width / 2 - windowBounds.width / 2
+    );
+
+    // Position window 4 pixels vertically below the tray icon
+    y = Math.round(trayBounds.y + trayBounds.height + 4);
+  } else {
+    x = width - windowBounds.width - 20;
+    y = height - windowBounds.height - 20;
+  }
+
+  return { x: x, y: y };
+};
+
+function showMainWindow() {
+  const position = getWindowPosition();
+  mainWindow.setPosition(position.x, position.y, false);
+  mainWindow.show();
+  mainWindow.setVisibleOnAllWorkspaces(true); // put the window on all screens
+  mainWindow.focus(); // focus the window up front on the active screen
+  mainWindow.setVisibleOnAllWorkspaces(false); // disable all screen behavior
+}
+
+function configureTray() {
+  tray = new Tray(`${__dirname}/src/assets/logo-tray.png`);
+  if (process.platform == "win32") {
+    const contextMenu = Menu.buildFromTemplate([
+      // { label: "✔️ Running", click: () => mainWindow.show() },
+      { type: "separator" },
+      {
+        label: "⏭️ Next Wallpaper",
+        click: () => mainWindow.webContents.send("next")
+      },
+      // {
+      //   label: "⏭️ Previous Wallpaper",
+      //   click: () => setPrevious()
+      // },
+      { type: "separator" },
+      // { label: "🌟 Star Current", click: () => mainWindow.show() },
+      // { label: "⛔ Blackist Current", click: () => mainWindow.show() },
+      // { type: "separator" },
+      { label: "Open", click: () => mainWindow.show() },
+      {
+        label: "Exit",
+        click: () => {
+          quit = true;
+          app.quit();
+        }
+      }
+    ]);
+    tray.setToolTip("Radiant Wallpaper Changer");
+    tray.setContextMenu(contextMenu);
+  }
+
+  tray.setIgnoreDoubleClickEvents(true);
+  tray.on("click", toggleWindow);
+}
+
+function toggleWindow() {
+  console.log(mainWindow.isVisible());
+  mainWindow.isVisible() ? mainWindow.hide() : showMainWindow();
 }
 
 function createBackgroundProcess() {
   var background = new BrowserWindow({
-    show: false //process.env.NODE_ENV === "DEV" ? true : false
+    show: false, //process.env.NODE_ENV === "DEV" ? true : false
+    skipTaskbar: true
   });
   background.loadURL(`file://${__dirname}/background.html`);
   background.webContents.openDevTools();
@@ -174,15 +228,11 @@ function setWindowsWallpaperFit(fit) {
       style = "0";
   }
 
-  console.log(fit);
-  console.log(style);
-  console.log(tile);
   regKey.set("WallpaperStyle", "REG_SZ", style, () => {});
   regKey.set("TileWallpaper", "REG_SZ", tile, () => {});
 }
 
 ipcMain.on("close", () => {
-  console.log("Quit");
   app.quit();
 });
 
@@ -231,7 +281,17 @@ ipcMain.on("change-wallpaper", (event, args) => {
         scale: args.scale.toLowerCase()
       });
 
-      addLinkToHistory({ link: args.link, sub: args.subreddit });
+      wallpaper.set(path.resolve(filename), {
+        scale: args.scale.toLowerCase()
+      });
+
+      addLinkToHistory({
+        link: args.link,
+        sub: args.subreddit,
+        fav: false,
+        blacklist: false,
+        date: new Date().valueOf()
+      });
 
       mainWindow.webContents.send("alert", "Change Successful!");
     })
