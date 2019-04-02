@@ -13,7 +13,7 @@ const download = require("image-downloader");
 const Store = require("electron-store");
 const store = new Store();
 
-const directory = "/Pictures/Wallpapers";
+const directory = path.join(app.getPath("pictures"), app.getName());
 
 const wallpaper = require("wallpaper");
 
@@ -187,7 +187,11 @@ function addLinkToHistory(link) {
 }
 
 function createSubredditDirectory(subreddit) {
-  var dir = path.join(os.homedir(), `${directory}/${subreddit}`);
+  var dir = path.join(directory, subreddit);
+
+  if (!fs.existsSync(directory)) {
+    fs.mkdirSync(directory);
+  }
 
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
@@ -270,7 +274,7 @@ ipcMain.on("change-wallpaper", (event, args) => {
   download
     .image({
       url: args.link,
-      dest: path.join(os.homedir(), `${directory}/${args.subreddit}`)
+      dest: path.join(directory, args.subreddit)
     })
     .then(({ filename }) => {
       if (process.platform == "win32") {

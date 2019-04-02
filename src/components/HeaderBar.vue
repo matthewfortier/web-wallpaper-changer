@@ -7,9 +7,6 @@
     <div class="center"></div>
     <div class="right">
       <div v-if="os == 'win32'" class="windows-buttons">
-        <div @click="minimize" class="windows-icon-bg">
-          <div id="minimize"></div>
-        </div>
         <div @click="close" class="windows-icon-bg">
           <div id="close"></div>
         </div>
@@ -28,9 +25,6 @@ export default {
     };
   },
   methods: {
-    minimize: () => {
-      BrowserWindow.getFocusedWindow().minimize();
-    },
     close: () => {
       BrowserWindow.getFocusedWindow().close();
     }

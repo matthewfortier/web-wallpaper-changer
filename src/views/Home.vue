@@ -13,6 +13,10 @@
       <Dropdown
         :selected="filter"
         :data="filterData"
+        :color="'#82aaff'"
+        :margin="
+          filter != 'Controversial' && filter != 'Top' ? '0px 5px 0px 0px' : ''
+        "
         v-on:select="filter = $event"
       />
       <Dropdown
@@ -20,6 +24,8 @@
         v-if="filter == 'Controversial' || filter == 'Top'"
         :selected="subFilter"
         :data="subFilterData"
+        :color="'#82aaff'"
+        :margin="'0px 5px'"
         v-on:select="subFilter = $event"
       />
       <input
@@ -47,9 +53,16 @@
     <section id="update">
       <input
         id="interval"
-        placeholder="seconds"
+        placeholder="value"
         v-model="refreshInterval"
         type="text"
+      />
+      <Dropdown
+        :selected="intervalType"
+        :data="intervals"
+        :color="'#f78c6c'"
+        :margin="'0px 5px'"
+        v-on:select="intervalType = $event"
       />
       <button id="refresh" @click="toggleRefresh()">
         {{ autoRefresh ? "Stop" : "Start" }}
@@ -82,6 +95,7 @@ export default {
       count: store.state.count,
       autoRefresh: store.state.autoRefresh,
       refreshInterval: store.state.refreshInterval,
+      intervalType: store.state.intervalType,
       filter: store.state.filter,
       subFilter: store.state.subFilter,
       scales: [],
@@ -99,7 +113,8 @@ export default {
         { name: "Month", id: "month" },
         { name: "Year", id: "year" },
         { name: "All", id: "all" }
-      ]
+      ],
+      intervals: [{ name: "seconds" }, { name: "minutes" }, { name: "hours" }]
     };
   },
   methods: {
@@ -124,20 +139,39 @@ export default {
     sendState() {
       state.set("state", store.state);
     },
+    getRefreshValue() {
+      var time = 0;
+      switch (this.intervalType) {
+        case "seconds":
+          time = this.refreshInterval * 1000;
+          break;
+        case "minutes":
+          time = this.refreshInterval * 60000;
+          break;
+        case "hours":
+          time = this.refreshInterval * 3600 * 1000;
+          break;
+      }
+
+      console.log(this.refreshInterval);
+      return time;
+    },
     setRefreshInterval() {
       timer = window.setInterval(() => {
         this.grabImages();
-      }, this.refreshInterval * 1000);
+      }, this.getRefreshValue());
     }
   },
   watch: {
     autoRefresh(val) {
+      console.log(this.refreshInterval);
+      console.log(this.intervalType);
       store.changeRefresh(val);
       if (val) {
         // it seems to me this additional check would make sense?
         timer = window.setInterval(() => {
           this.grabImages();
-        }, this.refreshInterval * 1000);
+        }, this.getRefreshValue());
       } else {
         window.clearInterval(timer);
         timer = null;
@@ -153,6 +187,10 @@ export default {
       this.autoRefresh = false;
       store.changeInterval(this.refreshInterval);
     },
+    intervalType() {
+      this.autoRefresh = false;
+      store.changeIntervalType(this.intervalType);
+    },
     count() {
       store.changeCount(this.count);
     },
@@ -164,6 +202,7 @@ export default {
     }
   },
   beforeCreate() {
+    //state.delete("state");
     if (state.get("state")) store.setState(state.get("state"));
 
     electron.ipcRenderer.on("hide", () => {
@@ -244,49 +283,6 @@ label {
 
 #reddit {
   display: flex;
-
-  .subFilter {
-    margin-left: 5px;
-  }
-  .dropdown {
-    width: 100%;
-    .dropdown-display {
-      border-color: #82aaff;
-      border-radius: 3px;
-      color: #82aaff;
-      height: 34px;
-      line-height: 36px;
-      padding: 0 10px;
-      border: 1px solid;
-      background-color: lighten(#090b10, 10);
-    }
-    ul {
-      background-color: lighten(#090b10, 10);
-      //border: 1px solid #82aaff;
-      border-radius: 3px;
-      margin-top: 5px;
-      min-width: 100%;
-      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25),
-        0 10px 10px rgba(0, 0, 0, 0.22);
-
-      li {
-        height: 34px;
-        text-align: left;
-        line-height: 34px;
-        cursor: pointer;
-        padding: 0 10px;
-        white-space: nowrap;
-
-        &:not(:last-child) {
-          border-bottom: 1px solid #090b10;
-        }
-
-        &:hover {
-          background-color: lighten(#090b10, 20);
-        }
-      }
-    }
-  }
 }
 
 #segmented-control {
@@ -356,15 +352,10 @@ input {
     width: 100%;
   }
 
-  &#count {
-    margin-left: 5px;
-  }
-
   &#interval {
     color: #f78c6c;
     border: 1px solid #f78c6c;
     max-width: 55px;
-    margin-right: 5px;
   }
 }
 

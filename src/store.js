@@ -5,6 +5,7 @@ export default {
     count: 100,
     autoRefresh: false,
     refreshInterval: 60,
+    intervalType: "seconds",
     filter: "Hot",
     subFilter: "Hour"
   },
@@ -25,6 +26,9 @@ export default {
   },
   changeInterval(interval) {
     this.state.refreshInterval = interval;
+  },
+  changeIntervalType(type) {
+    this.state.intervalType = type;
   },
   changeFilter(filter) {
     this.state.filter = filter;

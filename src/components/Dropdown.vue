@@ -1,6 +1,13 @@
 <template>
   <div class="dropdown" @click="toggle" v-click-outside="close">
-    <div class="dropdown-display">
+    <div
+      class="dropdown-display"
+      :style="{
+        color: this.color,
+        borderColor: this.color,
+        margin: this.margin
+      }"
+    >
       <font-awesome-icon
         v-if="current.icon"
         class="icon"
@@ -42,6 +49,14 @@ export default {
     data: {
       type: Array,
       required: true
+    },
+    color: {
+      type: String,
+      required: false
+    },
+    margin: {
+      type: String,
+      required: false
     }
   },
   data() {
@@ -114,10 +129,18 @@ export default {
 <style lang="scss" scoped>
 .dropdown {
   position: relative;
+  width: 100%;
+
   &-display {
     display: flex;
     text-align: left;
     cursor: pointer;
+    border-radius: 3px;
+    height: 34px;
+    line-height: 36px;
+    padding: 0 10px;
+    border: 1px solid;
+    background-color: lighten(#090b10, 10);
 
     .icon {
       height: 100%;
@@ -152,9 +175,29 @@ export default {
     transition: height 0.5s ease-in-out;
     position: absolute;
     min-width: 100;
+    background-color: lighten(#090b10, 10);
+    border-radius: 3px;
+    margin-top: 5px;
+    min-width: 100%;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+    z-index: 1;
 
     li {
       display: flex;
+      height: 34px;
+      text-align: left;
+      line-height: 34px;
+      cursor: pointer;
+      padding: 0 10px;
+      white-space: nowrap;
+
+      &:not(:last-child) {
+        border-bottom: 1px solid #090b10;
+      }
+
+      &:hover {
+        background-color: lighten(#090b10, 20);
+      }
     }
 
     &-icon {

@@ -2,18 +2,10 @@
   <div id="app">
     <HeaderBar v-if="platform != 'darwin'" />
     <div class="router-links">
-      <router-link tag="li" to="/">
-        <a>Home</a>
-      </router-link>
-      <router-link tag="li" to="/history">
-        <a>History</a>
-      </router-link>
-      <router-link tag="li" to="/favorites">
-        <a>Favorites</a>
-      </router-link>
-      <router-link tag="li" to="/blacklist">
-        <a>Blacklist</a>
-      </router-link>
+      <router-link tag="li" to="/">Home</router-link>
+      <router-link tag="li" to="/history">History</router-link>
+      <router-link tag="li" to="/favorites">Favorites</router-link>
+      <router-link tag="li" to="/blacklist">Blacklist</router-link>
     </div>
     <router-view />
     <FooterBar />
@@ -75,11 +67,6 @@ body {
       font-family: "Calibre", sans-serif;
       font-size: 1rem;
       padding: 0 10px;
-
-      a {
-        text-decoration: none;
-        color: #dce0e4;
-      }
 
       &:hover:not(.router-link-exact-active) {
         background-color: lighten(#090b10, 15);
