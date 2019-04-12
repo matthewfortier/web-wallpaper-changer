@@ -16,43 +16,27 @@
 </template>
 
 <script>
-const electron = window.require('electron')
-const ElectronStore = electron.remote.require('electron-store')
-const state = new ElectronStore()
 
 export default {
   name: 'blacklist',
   data () {
     return {
-      images: this.getBlacklist(),
-      platform: electron.remote.process.platform
+      images: this.$store.getters.BLACKED,
+      history: this.$store.getters.HISTORY,
+      platform: this.$electron.remote.process.platform
     }
   },
   methods: {
-    getBlacklist () {
-      return state
-        .get('history')
-        .filter(wall => wall.blacklist)
-        .sort((a, b) => a.date < b.date)
-    },
     changeWallpaper (img) {
       console.log('Changing to ' + img.link)
-      electron.ipcRenderer.send('change-wallpaper', {
+      this.$electron.ipcRenderer.send('change-wallpaper', {
         link: img.link,
         subreddit: img.sub,
         scale: this.scale
       })
     },
-    clearHistory () {
-      electron.ipcRenderer.send('clear-history')
-      this.images = []
-    },
     unblack (img) {
-      var full = state.get('history')
-      var place = full.find(wall => wall.link === img.link)
-      place.blacklist = false
-      state.set('history', full)
-      this.images = this.getBlacklist()
+      this.$store.dispatch('UNBLACKLIST', this.history.indexOf(img))
     }
   }
 }
@@ -60,6 +44,9 @@ export default {
 
 <style lang="scss" scoped>
 .history {
+  position: absolute;
+  top: 24px;
+  height: calc(100% - 48px);
   width: 100%;
   display: flex;
   flex-direction: column;

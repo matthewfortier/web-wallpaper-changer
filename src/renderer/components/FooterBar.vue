@@ -1,9 +1,11 @@
 <template>
-  <div class="footer-bar">{{ alert }}</div>
+  <div class="footer-bar">
+    <span>{{ alert }}</span>
+    <button @click="quit">Quit</button>
+  </div>
 </template>
 
 <script>
-const electron = window.require('electron')
 export default {
   name: 'FooterBar',
   data () {
@@ -11,9 +13,13 @@ export default {
       alert: ''
     }
   },
-  methods: {},
+  methods: {
+    quit () {
+      this.$electron.ipcRenderer.send('quit')
+    }
+  },
   mounted () {
-    electron.ipcRenderer.on('alert', (_, args) => {
+    this.$electron.ipcRenderer.on('alert', (_, args) => {
       this.alert = args
       setTimeout(() => {
         this.alert = ''
@@ -26,14 +32,24 @@ export default {
 <style lang="scss" scoped>
 @import "../themes.scss";
 .footer-bar {
-  display: block;
-  height: 24px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
   width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 24px;
   user-select: none;
   background-color: #090b10;
   border-top: 1px solid #000;
   text-align: left;
   line-height: 24px;
-  padding-left: 10px;
+
+  button {
+    float: right;
+    height: 80%;
+  }
 }
 </style>

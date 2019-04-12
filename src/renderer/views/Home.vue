@@ -46,23 +46,33 @@
         :margin="'0px 5px'"
         v-on:select="intervalType = $event"
       />
-      <button id="refresh" @click="toggleRefresh()">{{ autoRefresh ? "Stop" : "Start" }}</button>
+      <Button
+        id="refresh"
+        @click.native="toggleRefresh()"
+        :color="'#f78c6c'"
+      >{{ autoRefresh ? "Stop" : "Start" }}</Button>
     </section>
     <section id="fetch">
-      <button id="change" @click="changeWallpaper()">Next Wallpaper</button>
+      <Button id="change" @click.native="changeWallpaper()" :color="'#c3e88d'">Next Wallpaper</Button>
     </section>
+    <Settings/>
   </div>
 </template>
 
 <script>
 import Dropdown from '@/components/Dropdown'
-const electron = window.require('electron')
-var timer = null
+import Button from '@/components/Button'
+import Checkbox from '@/components/Checkbox'
+import Settings from '@/components/Settings'
+import { clearInterval } from 'timers'
 
 export default {
   name: 'home',
   components: {
-    Dropdown
+    Dropdown,
+    Button,
+    Checkbox,
+    Settings
   },
   computed: {
     scale: {
@@ -101,12 +111,12 @@ export default {
         this.$store.dispatch('CHANGE_REFRESH', val)
         if (val) {
         // it seems to me this additional check would make sense?
-          timer = window.setInterval(() => {
+          this.timer = window.setInterval(() => {
             this.grabImages()
           }, this.getRefreshValue())
         } else {
-          window.clearInterval(timer)
-          timer = null
+          window.clearInterval(this.timer)
+          this.timer = null
         }
       }
     },
@@ -117,6 +127,7 @@ export default {
       set (val) {
         console.log(val)
         this.$store.dispatch('CHANGE_INTERVAL', val)
+        this.autoRefresh = false
       }
     },
     intervalType: {
@@ -126,6 +137,7 @@ export default {
       set (val) {
         console.log(val)
         this.$store.dispatch('CHANGE_INTERVAL_TYPE', val)
+        this.autoRefresh = false
       }
     },
     filter: {
@@ -149,6 +161,7 @@ export default {
   },
   data () {
     return {
+      timer: null,
       scales: [],
       filterData: [
         { name: 'Hot', icon: 'burn' },
@@ -170,15 +183,13 @@ export default {
   },
   methods: {
     grabImages () {
-      // electron.ipcRenderer.send("grabImages", this.subreddit);
-      electron.ipcRenderer.send('grab-images', {
+      this.$electron.ipcRenderer.send('grab-images', {
         subreddit: this.subs,
         scale: this.scale,
         filter: this.filter,
         subFilter: this.subFilter,
         count: this.count
       })
-      console.log(electron.remote.process.platform)
     },
     changeWallpaper () {
       this.autoRefresh = false
@@ -205,25 +216,27 @@ export default {
       return time
     },
     setRefreshInterval () {
-      timer = window.setInterval(() => {
+      this.timer = window.setInterval(() => {
         this.grabImages()
       }, this.getRefreshValue())
     }
   },
   created () {
-    console.log(electron.remote.process.platform)
-    if (electron.remote.process.platform === 'win32') {
+    if (this.$electron.remote.process.platform === 'win32') {
       this.scales = ['Fit', 'Fill', 'Span', 'Stretch', 'Center', 'Tile']
     } else {
       this.scales = ['Auto', 'Fit', 'Fill', 'Stretch', 'Center']
     }
+  },
+  beforeDestroy () {
+    clearInterval(this.timer)
   },
   mounted () {
     if (this.$store.getters.REFRESH) {
       this.setRefreshInterval()
     }
 
-    electron.ipcRenderer.on('next', () => {
+    this.$electron.ipcRenderer.on('next', () => {
       console.log('Next')
       this.changeWallpaper()
     })
@@ -245,6 +258,8 @@ export default {
 }
 
 .main-content {
+  position: absolute;
+  top: 24px;
   display: flex;
   flex-direction: column;
   padding: 10px;
@@ -325,7 +340,7 @@ label {
   display: flex;
 }
 
-input {
+input[type="text"] {
   height: 34px;
   max-height: 36px;
   background-color: transparent;
@@ -348,38 +363,6 @@ input {
     color: #f78c6c;
     border: 1px solid #f78c6c;
     max-width: 55px;
-  }
-}
-
-.main-content button {
-  height: 36px;
-  max-height: 36px;
-  width: 100%;
-  color: #eee;
-  border-radius: 3px;
-  background-color: lighten(#090b10, 10);
-  font-family: "Calibre", sans-serif;
-  font-size: 1rem;
-  outline: none;
-  cursor: pointer;
-
-  &#change {
-    border: 1px solid #c3e88d;
-    color: #c3e88d;
-  }
-
-  &#refresh {
-    border: 1px solid #f78c6c;
-    color: #f78c6c;
-  }
-
-  &:hover {
-    background-color: lighten(#090b10, 15);
-  }
-
-  &:active {
-    border-radius: 5px;
-    transform: scale(0.99);
   }
 }
 </style>

@@ -17,10 +17,11 @@ import {
   faChevronDown,
   faStar,
   faMinusSquare,
-  faTrash
+  faTrash,
+  faCheck
 } from '@fortawesome/free-solid-svg-icons'
 
-import { faMinusSquare as farMinusSquare } from '@fortawesome/free-regular-svg-icons'
+import { faMinusSquare as farMinusSquare, faSquare } from '@fortawesome/free-regular-svg-icons'
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 Vue.use(VLazyImagePlugin)
@@ -35,6 +36,8 @@ library.add(faStar)
 library.add(faMinusSquare)
 library.add(farMinusSquare)
 library.add(faTrash)
+library.add(faCheck)
+library.add(faSquare)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 

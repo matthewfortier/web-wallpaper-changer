@@ -14,44 +14,28 @@
 </template>
 
 <script>
-const electron = window.require('electron')
-const ElectronStore = electron.remote.require('electron-store')
-const state = new ElectronStore()
-
 export default {
   name: 'favorites',
   data () {
     return {
-      images: this.getFavorites(),
+      images: this.$store.getters.FAVORITES,
+      history: this.$store.getters.HISTORY,
       scale: this.$store.getters.SCALE,
-      platform: electron.remote.process.platform
+      platform: this.$electron.remote.process.platform
     }
   },
   methods: {
-    getFavorites () {
-      return state
-        .get('history')
-        .filter(wall => wall.fav)
-        .sort((a, b) => a.date < b.date)
-    },
     changeWallpaper (img) {
       console.log('Changing to ' + img.link)
-      electron.ipcRenderer.send('change-wallpaper', {
+      this.$electron.ipcRenderer.send('change-wallpaper', {
+        origin: 'favorites',
         link: img.link,
         subreddit: img.sub,
         scale: this.scale
       })
     },
-    clearHistory () {
-      electron.ipcRenderer.send('clear-history')
-      this.images = []
-    },
     unfavorite (img) {
-      var full = state.get('history')
-      var place = full.find(wall => wall.link === img.link)
-      place.fav = false
-      state.set('history', full)
-      this.images = this.getFavorites()
+      this.$store.dispatch('UNFAVORITE', this.history.indexOf(img))
     }
   }
 }
@@ -59,6 +43,9 @@ export default {
 
 <style lang="scss" scoped>
 .history {
+  position: absolute;
+  top: 24px;
+  height: calc(100% - 48px);
   width: 100%;
   display: flex;
   flex-direction: column;

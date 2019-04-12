@@ -7,7 +7,9 @@
       <router-link tag="li" to="/favorites">Favorites</router-link>
       <router-link tag="li" to="/blacklist">Blacklist</router-link>
     </div>
-    <router-view/>
+    <transition name="slide">
+      <router-view/>
+    </transition>
     <FooterBar/>
   </div>
 </template>
@@ -72,6 +74,39 @@ body {
         background-color: lighten(#090b10, 15);
       }
     }
+  }
+}
+
+.slide-enter-active {
+  animation: slideInRight 0.3s;
+}
+.slide-leave-active {
+  animation: slideOutLeft 0.3s;
+}
+
+@keyframes slideInRight {
+  from {
+    -webkit-transform: translate3d(100%, 0, 0);
+    transform: translate3d(100%, 0, 0);
+    visibility: visible;
+  }
+
+  to {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    visibility: hidden;
+    -webkit-transform: translate3d(-100%, 0, 0);
+    transform: translate3d(-100%, 0, 0);
   }
 }
 </style>

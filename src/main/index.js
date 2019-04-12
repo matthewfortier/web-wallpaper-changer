@@ -1,16 +1,15 @@
 'use strict'
 
 import { app, BrowserWindow, ipcMain, Menu, Tray, screen } from 'electron'
+import axios from 'axios'
 import path from 'path'
-import os from 'os'
 import fs from 'fs'
 import del from 'del'
 import Registry from 'winreg'
 import download from 'image-downloader'
 import wallpaper from 'wallpaper'
-import Store from 'electron-store'
+import store from '../renderer/store'
 
-const store = new Store()
 const directory = path.join(app.getPath('pictures'), app.getName())
 
 /**
@@ -24,7 +23,7 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 let mainWindow
-let backgroundWindow
+// let backgroundWindow
 let tray
 let quit = false
 
@@ -33,10 +32,14 @@ const winURL =
     ? `http://localhost:9080`
     : `file://${__dirname}/index.html`
 
+const trayURL = process.env.NODE_ENV === 'development'
+  ? `${__dirname}/logo-tray.png`
+  : path.join(__dirname, '/static/logo-tray.png')
+
 app.on('ready', () => {
   configureTray()
   createMainWindow()
-  backgroundWindow = createBackgroundProcess()
+  // backgroundWindow = createBackgroundProcess()
 })
 
 app.on('window-all-closed', () => {
@@ -152,7 +155,7 @@ function showMainWindow () {
 }
 
 function configureTray () {
-  tray = new Tray(`${__dirname}/logo-tray.png`)
+  tray = new Tray(trayURL)
   if (process.platform === 'win32') {
     const contextMenu = Menu.buildFromTemplate([
       // { label: "✔️ Running", click: () => mainWindow.show() },
@@ -180,9 +183,9 @@ function configureTray () {
     ])
     tray.setToolTip('Radiant Wallpaper Changer')
     tray.setContextMenu(contextMenu)
-  } else {
-    tray.setIgnoreDoubleClickEvents(true)
   }
+
+  // tray.setIgnoreDoubleClickEvents(true)
   tray.on('click', toggleWindow)
 }
 
@@ -191,9 +194,9 @@ function toggleWindow () {
   mainWindow.isVisible() ? mainWindow.hide() : showMainWindow()
 }
 
-function createBackgroundProcess () {
+/* function createBackgroundProcess () {
   var background = new BrowserWindow({
-    show: true, // process.env.NODE_ENV === "DEV" ? true : false
+    show: false, // process.env.NODE_ENV === "DEV" ? true : false
     skipTaskbar: true
   })
   background.loadURL(
@@ -201,27 +204,10 @@ function createBackgroundProcess () {
   )
   background.webContents.openDevTools()
   return background
-}
-
-function addLinkToHistory (link) {
-  if (!store.get('history')) {
-    store.set('history', [link])
-  } else {
-    let history = store.get('history')
-    var filename = link.link.split('/').pop()
-    if (!history.some(img => img.link.endsWith(filename))) {
-      history.push(link)
-      store.set('history', history)
-    }
-  }
-}
+} */
 
 function createSubredditDirectory (subreddit) {
   var dir = path.join(directory, subreddit)
-
-  if (!fs.existsSync(directory)) {
-    fs.mkdirSync(directory)
-  }
 
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
@@ -262,50 +248,107 @@ function setWindowsWallpaperFit (fit) {
       style = '0'
   }
 
-  regKey.set('WallpaperStyle', 'REG_SZ', style, () => {})
-  regKey.set('TileWallpaper', 'REG_SZ', tile, () => {})
+  regKey.set('WallpaperStyle', 'REG_SZ', style, () => { })
+  regKey.set('TileWallpaper', 'REG_SZ', tile, () => { })
 }
 
-ipcMain.on('close', () => {
-  app.quit()
-})
-
-ipcMain.on('alert', (_, args) => {
-  mainWindow.webContents.send('alert', args)
-})
-
-ipcMain.on('get-history', () => {
-  if (store.get('history')) {
-    mainWindow.webContents.send('history', store.get('history').reverse())
+function buildURL (args) {
+  var subs = args.subreddit.split(',')
+  console.log(subs)
+  var subreddit = subs[Math.floor(Math.random() * subs.length)]
+  console.log(subreddit)
+  return {
+    url: `https://www.reddit.com/r/${subreddit.trim()}/${args.filter.toLowerCase()}/.json?t=${args.subFilter}&limit=${args.count}`,
+    subreddit: subreddit
   }
-})
+}
 
-ipcMain.on('clear-history', () => {
-  store.clear('history')
+function isValidFormat (link) {
+  var formats = ['jpeg', 'jpg', 'tiff', 'png', 'bmp', 'gif']
+  return formats.includes(
+    link
+      .split('.')
+      .pop()
+      .toLowerCase()
+  )
+}
 
-  var photoDir = path.join(os.homedir(), directory)
-  del.sync([`${photoDir}/**`, `!${photoDir}`], {
-    force: true
+function filterOutHistory (res) {
+  var history = store.getters.HISTORY.map(img => img.link)
+
+  if (history.length === 0) {
+    return res
+  }
+
+  return res.filter(value => !history.includes(value.data.url))
+}
+
+function filterOutBlacklist (res) {
+  var blacklist = store.getters.BLACKED.map(img => img.link)
+
+  if (blacklist.length === 0) {
+    return res
+  }
+
+  return res.filter(value => !blacklist.includes(value.data.url))
+}
+
+function grabImages (args) {
+  console.log(buildURL(args))
+  var url = buildURL(args)
+  axios.get(url.url).then(res => {
+    var children = res.data.data.children
+    console.log('Res Count: ' + children.length)
+
+    children = filterOutBlacklist(children)
+    console.log('Minus Blacklist: ' + children.length)
+
+    if (!store.getters.SETTINGS.repeats) {
+      children = filterOutHistory(children)
+      console.log('Minus History: ' + children.length)
+    }
+
+    if (children.some(child => isValidFormat(child.data.url))) {
+      var image = children[Math.floor(Math.random() * children.length)]
+
+      while (!isValidFormat(image.data.url)) {
+        console.log('While')
+        image = children[Math.floor(Math.random() * children.length)]
+      }
+
+      console.log(image.data.url)
+      console.log(image.data.title)
+      changeWallaper({
+        origin: 'background',
+        link: image.data.url,
+        title: image.data.title,
+        scale: args.scale,
+        subreddit: url.subreddit
+      })
+    } else {
+      console.log('No Results')
+      alert('No results, try another filter combination')
+    }
   })
-})
+}
 
-ipcMain.on('grab-images', (event, args) => {
-  backgroundWindow.webContents.send('sub', args)
-})
-
-ipcMain.on('state', (event, args) => {
-  console.log('State')
-  store.set('state', args)
-  app.quit()
-})
-
-ipcMain.on('change-wallpaper', (event, args) => {
+function changeWallaper (args) {
   console.log(args.subreddit)
-  createSubredditDirectory(args.subreddit)
+
+  if (!fs.existsSync(directory)) {
+    fs.mkdirSync(directory)
+  }
+
+  if (store.getters.SETTINGS.download && store.getters.SETTINGS.organize) {
+    createSubredditDirectory(args.subreddit)
+  }
+
+  var filename = !store.getters.SETTINGS.download ? 'wallpaper.' + args.link.split('.').pop() : ''
+
   download
     .image({
       url: args.link,
-      dest: path.join(directory, args.subreddit)
+      dest: path.join(directory, store.getters.SETTINGS.organize ? args.subreddit : filename)
     })
     .then(({ filename }) => {
       if (process.platform === 'win32') {
@@ -316,21 +359,61 @@ ipcMain.on('change-wallpaper', (event, args) => {
         scale: args.scale.toLowerCase()
       })
 
-      wallpaper.set(path.resolve(filename), {
-        scale: args.scale.toLowerCase()
-      })
+      // If user chooses not to download all of the wallpapers
+      // we need to set the wallpaper twice due to a macOS issue
+      // with setting the a new wallpaper with the same filename
+      if (!store.getters.SETTINGS.download) {
+        wallpaper.set(path.resolve(filename), {
+          scale: args.scale.toLowerCase()
+        })
+      }
 
-      addLinkToHistory({
-        link: args.link,
-        sub: args.subreddit,
-        fav: false,
-        blacklist: false,
-        date: new Date().valueOf()
-      })
+      if (args.origin === 'background') {
+        console.log(store.getters.SETTINGS.repeats)
+        store.dispatch('ADD_TO_HISTORY', {
+          link: args.link,
+          title: args.title,
+          sub: args.subreddit,
+          fav: false,
+          blacklist: false,
+          date: Date.now()
+        })
+      }
 
       mainWindow.webContents.send('alert', 'Change Successful!')
     })
     .catch(err => {
       console.log(err)
     })
+}
+
+function alert (args) {
+  mainWindow.webContents.send('alert', args)
+}
+
+ipcMain.on('close', () => {
+  app.quit()
+})
+
+ipcMain.on('quit', () => {
+  quit = true
+  app.quit()
+})
+
+ipcMain.on('alert', (_, args) => {
+  alert(args)
+})
+
+ipcMain.on('clear-history', () => {
+  del.sync([`${directory}/**`, `!${directory}`], {
+    force: true
+  })
+})
+
+ipcMain.on('grab-images', (event, args) => {
+  grabImages(args)
+})
+
+ipcMain.on('change-wallpaper', (event, args) => {
+  changeWallaper(args)
 })
