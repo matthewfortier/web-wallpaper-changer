@@ -1,10 +1,10 @@
 <template>
   <div class="checkbox">
     <div class="box">
-      <transition enter-active-class="animated zoomIn" leave-active-class="animated zoomOut">
+      <transition name="zoom">
         <font-awesome-icon v-if="enabled" icon="check" @click="$emit('select', false)"></font-awesome-icon>
       </transition>
-      <transition enter-active-class="animated zoomIn" leave-active-class="animated zoomOut">
+      <transition name="zoom">
         <font-awesome-icon v-if="!enabled" :icon="['far', 'square']" @click="$emit('select', true)"></font-awesome-icon>
       </transition>
     </div>
@@ -40,6 +40,42 @@ export default {
     margin-left: 5px;
   }
 }
+
+.zoom-enter-active {
+  animation: zoomIn 0.3s;
+}
+.zoom-leave-active {
+  animation: zoomOut 0.3s;
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    -webkit-transform: scale3d(0.3, 0.3, 0.3);
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes zoomOut {
+  from {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+    -webkit-transform: scale3d(0.3, 0.3, 0.3);
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
 
 input[type="checkbox"] {
   display: none;

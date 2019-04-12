@@ -186,25 +186,8 @@ function configureTray () {
   }
 
   // tray.setIgnoreDoubleClickEvents(true)
-  tray.on('click', toggleWindow)
+  tray.on('click', showMainWindow)
 }
-
-function toggleWindow () {
-  console.log(mainWindow.isVisible())
-  mainWindow.isVisible() ? mainWindow.hide() : showMainWindow()
-}
-
-/* function createBackgroundProcess () {
-  var background = new BrowserWindow({
-    show: false, // process.env.NODE_ENV === "DEV" ? true : false
-    skipTaskbar: true
-  })
-  background.loadURL(
-    `file://${path.join(process.cwd(), __dirname)}/background.html`
-  )
-  background.webContents.openDevTools()
-  return background
-} */
 
 function createSubredditDirectory (subreddit) {
   var dir = path.join(directory, subreddit)

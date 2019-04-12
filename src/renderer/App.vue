@@ -33,7 +33,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import url("https://cdn.jsdelivr.net/npm/animate.css@3.5.1");
 body {
   background-color: #0f111a;
   padding: 0;
@@ -108,5 +107,14 @@ body {
     -webkit-transform: translate3d(-100%, 0, 0);
     transform: translate3d(-100%, 0, 0);
   }
+}
+
+.ps .ps__rail-x:hover,
+.ps .ps__rail-y:hover,
+.ps .ps__rail-x:focus,
+.ps .ps__rail-y:focus,
+.ps .ps__rail-x.ps--clicking,
+.ps .ps__rail-y.ps--clicking {
+  background-color: transparent !important;
 }
 </style>

@@ -1,21 +1,29 @@
 <template>
-  <div class="history">
-    <div class="images">
-      <div class="history-image" v-for="(img, index) in images" :key="index">
-        <div @click="changeWallpaper(img)">
-          <v-lazy-image :src="img.link"/>
+  <Page>
+    <div class="history">
+      <vue-custom-scrollbar class="images">
+        <div class="history-image" v-for="(img, index) in images" :key="index">
+          <div @click="changeWallpaper(img)">
+            <v-lazy-image :src="img.link"/>
+          </div>
+          <div class="image-buttons">
+            <button class="yellow" v-if="img.fav" @click="unfavorite(img)">★</button>
+          </div>
         </div>
-        <div class="image-buttons">
-          <button class="yellow" v-if="img.fav" @click="unfavorite(img)">★</button>
-        </div>
-      </div>
+      </vue-custom-scrollbar>
     </div>
-  </div>
+  </Page>
 </template>
 
 <script>
+import Page from '@/components/Page'
+import vueCustomScrollbar from 'vue-custom-scrollbar'
 export default {
   name: 'favorites',
+  components: {
+    Page,
+    vueCustomScrollbar
+  },
   data () {
     return {
       images: this.$store.getters.FAVORITES,
@@ -43,16 +51,14 @@ export default {
 
 <style lang="scss" scoped>
 .history {
-  position: absolute;
-  top: 24px;
-  height: calc(100% - 48px);
+  height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
 
   .images {
-    height: calc(100vh - 49px);
+    flex: 1;
     overflow: auto;
   }
 

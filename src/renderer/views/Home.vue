@@ -61,6 +61,7 @@
 
 <script>
 import Dropdown from '@/components/Dropdown'
+import Page from '@/components/Page'
 import Button from '@/components/Button'
 import Checkbox from '@/components/Checkbox'
 import Settings from '@/components/Settings'
@@ -70,6 +71,7 @@ export default {
   name: 'home',
   components: {
     Dropdown,
+    Page,
     Button,
     Checkbox,
     Settings
@@ -161,6 +163,7 @@ export default {
   },
   data () {
     return {
+      process: this.$electron.remote.process.platform,
       timer: null,
       scales: [],
       filterData: [
@@ -258,8 +261,6 @@ export default {
 }
 
 .main-content {
-  position: absolute;
-  top: 24px;
   display: flex;
   flex-direction: column;
   padding: 10px;

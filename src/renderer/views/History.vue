@@ -1,41 +1,49 @@
 <template>
-  <div class="history">
-    <button id="clear-history" @click="clearHistory()">Clear History</button>
-    <div class="images">
-      <div class="history-image" v-for="(img, index) in history" :key="index">
-        <div @click="changeWallpaper(img)">
-          <v-lazy-image :src="img.link"/>
-        </div>
-        <span class="image-title">{{ img.title }}</span>
-        <div class="image-buttons">
-          <div class="left">
-            <div class="favorite-buttons" v-if="img.fav || !img.blacklist">
-              <button class="yellow" v-if="img.fav" @click="unfavorite(img, index)">★</button>
-              <button class="yellow" v-else @click="favorite(img, index)">☆</button>
-            </div>
-
-            <div class="blacklist-buttons" v-if="img.blacklist || !img.fav">
-              <button class="red" v-if="img.blacklist" @click="unblack(img, index)">
-                <font-awesome-icon icon="minus-square"></font-awesome-icon>
-              </button>
-              <button class="red" v-else @click="black(img, index)">
-                <font-awesome-icon :icon="['far', 'minus-square']"></font-awesome-icon>
-              </button>
-            </div>
+  <Page>
+    <div class="history">
+      <button id="clear-history" @click="clearHistory()">Clear History</button>
+      <vue-custom-scrollbar class="images">
+        <div class="history-image" v-for="(img, index) in history" :key="index">
+          <div @click="changeWallpaper(img)">
+            <v-lazy-image :src="img.link"/>
           </div>
+          <span class="image-title">{{ img.title }}</span>
+          <div class="image-buttons">
+            <div class="left">
+              <div class="favorite-buttons" v-if="img.fav || !img.blacklist">
+                <button class="yellow" v-if="img.fav" @click="unfavorite(img, index)">★</button>
+                <button class="yellow" v-else @click="favorite(img, index)">☆</button>
+              </div>
 
-          <button class="trash" @click="trash(img, index)">
-            <font-awesome-icon icon="trash"></font-awesome-icon>
-          </button>
+              <div class="blacklist-buttons" v-if="img.blacklist || !img.fav">
+                <button class="red" v-if="img.blacklist" @click="unblack(img, index)">
+                  <font-awesome-icon icon="minus-square"></font-awesome-icon>
+                </button>
+                <button class="red" v-else @click="black(img, index)">
+                  <font-awesome-icon :icon="['far', 'minus-square']"></font-awesome-icon>
+                </button>
+              </div>
+            </div>
+
+            <button class="trash" @click="trash(img, index)">
+              <font-awesome-icon icon="trash"></font-awesome-icon>
+            </button>
+          </div>
         </div>
-      </div>
+      </vue-custom-scrollbar>
     </div>
-  </div>
+  </Page>
 </template>
 
 <script>
+import Page from '@/components/Page'
+import vueCustomScrollbar from 'vue-custom-scrollbar'
 export default {
   name: 'history',
+  components: {
+    Page,
+    vueCustomScrollbar
+  },
   data () {
     return {
       history: this.$store.getters.HISTORY
@@ -76,16 +84,14 @@ export default {
 
 <style lang="scss" scoped>
 .history {
-  position: absolute;
-  top: 24px;
+  height: 100%;
   width: 100%;
-  height: calc(100% - 48px);
   display: flex;
   flex-direction: column;
   justify-content: center;
 
   .images {
-    height: calc(100vh - 49px);
+    flex: 1;
     overflow-x: hidden;
     overflow-y: auto;
   }
@@ -102,6 +108,7 @@ export default {
     cursor: pointer;
     color: #82aaff;
     border-color: #82aaff;
+    border: 1px solid;
   }
 
   .history-image {
