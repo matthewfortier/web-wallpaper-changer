@@ -47,7 +47,12 @@ export default {
   text-align: left;
   line-height: 24px;
 
+  span {
+    margin-left: 10px;
+  }
+
   button {
+    margin-right: 10px;
     float: right;
     height: 80%;
   }

@@ -7,7 +7,7 @@
       <router-link tag="li" to="/favorites">Favorites</router-link>
       <router-link tag="li" to="/blacklist">Blacklist</router-link>
     </div>
-    <transition name="slide">
+    <transition :name="transition">
       <router-view/>
     </transition>
     <FooterBar/>
@@ -26,8 +26,20 @@ export default {
   },
   data () {
     return {
+      routes: ['home', 'history', 'favorites', 'blacklist'],
+      transition: 'slide-left',
       platform: require('os').platform()
     }
+  },
+  created () {
+    this.$router.beforeEach((to, from, next) => {
+      var toIndex = this.routes.indexOf(to.name)
+      var fromIndex = this.routes.indexOf(from.name)
+
+      this.transition = fromIndex < toIndex ? 'slide-left' : 'slide-right'
+      console.log(this.transition)
+      next()
+    })
   }
 }
 </script>
@@ -76,10 +88,17 @@ body {
   }
 }
 
-.slide-enter-active {
+.slide-right-enter-active {
+  animation: slideInLeft 0.3s;
+}
+.slide-right-leave-active {
+  animation: slideOutRight 0.3s;
+}
+
+.slide-left-enter-active {
   animation: slideInRight 0.3s;
 }
-.slide-leave-active {
+.slide-left-leave-active {
   animation: slideOutLeft 0.3s;
 }
 
@@ -87,6 +106,19 @@ body {
   from {
     -webkit-transform: translate3d(100%, 0, 0);
     transform: translate3d(100%, 0, 0);
+    visibility: visible;
+  }
+
+  to {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    -webkit-transform: translate3d(-100%, 0, 0);
+    transform: translate3d(-100%, 0, 0);
     visibility: visible;
   }
 
@@ -106,6 +138,19 @@ body {
     visibility: hidden;
     -webkit-transform: translate3d(-100%, 0, 0);
     transform: translate3d(-100%, 0, 0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    visibility: hidden;
+    -webkit-transform: translate3d(100%, 0, 0);
+    transform: translate3d(100%, 0, 0);
   }
 }
 

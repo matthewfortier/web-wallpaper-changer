@@ -120,23 +120,20 @@ export default {
       margin-top: 10px;
     }
 
-    &:after {
-      transition: all 200ms ease-in-out;
-    }
-
     &:hover {
       .image-buttons {
-        display: flex;
+        opacity: 1;
         z-index: 1;
+        transition: opacity .2s ease-in-out;
       }
 
       .image-title {
-        display: inherit;
+        opacity: 1;
+        transition: opacity .2s ease-in-out;      
       }
     }
 
     .image-title {
-      display: none;
       position: absolute;
       top: 50%;
       left: -10px;
@@ -145,6 +142,8 @@ export default {
       font-size: 22px;
       background-color: rgba(0, 0, 0, 0.6);
       padding: 0 10px;
+      opacity: 0; // Hidden
+      transition: opacity .2s ease-in-out;
     }
 
     .image-buttons {
@@ -152,7 +151,9 @@ export default {
       bottom: 0;
       left: 0;
       width: 100%;
-      display: none;
+      display: flex;
+      opacity: 0; // Hidden
+      transition: opacity .2s ease-in-out;
 
       .left {
         display: flex;
