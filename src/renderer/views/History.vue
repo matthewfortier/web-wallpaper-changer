@@ -7,27 +7,42 @@
           <div @click="changeWallpaper(img)">
             <v-lazy-image :src="img.link"/>
           </div>
-          <span class="image-title">{{ img.title }}</span>
+          <span class="image-title">[/r/{{img.sub}}] {{ img.title }}</span>
           <div class="image-buttons">
             <div class="left">
               <div class="favorite-buttons" v-if="img.fav || !img.blacklist">
-                <button class="yellow" v-if="img.fav" @click="unfavorite(img, index)">★</button>
-                <button class="yellow" v-else @click="favorite(img, index)">☆</button>
+                <button
+                  class="yellow"
+                  title="Unfavorite"
+                  v-if="img.fav"
+                  @click="unfavorite(img, index)"
+                >★</button>
+                <button class="yellow" title="Favorite" v-else @click="favorite(img, index)">☆</button>
               </div>
 
               <div class="blacklist-buttons" v-if="img.blacklist || !img.fav">
-                <button class="red" v-if="img.blacklist" @click="unblack(img, index)">
+                <button
+                  class="red"
+                  title="Unblacklist"
+                  v-if="img.blacklist"
+                  @click="unblack(img, index)"
+                >
                   <font-awesome-icon icon="minus-square"></font-awesome-icon>
                 </button>
-                <button class="red" v-else @click="black(img, index)">
+                <button class="red" title="Blacklist" v-else @click="black(img, index)">
                   <font-awesome-icon :icon="['far', 'minus-square']"></font-awesome-icon>
                 </button>
               </div>
             </div>
 
-            <button class="trash" @click="trash(img, index)">
-              <font-awesome-icon icon="trash"></font-awesome-icon>
-            </button>
+            <div class="right">
+              <button class="trash" title="Open Post in Browser" @click="open(img.permalink)">
+                <font-awesome-icon icon="external-link-alt"></font-awesome-icon>
+              </button>
+              <button class="trash" title="Remove From History" @click="trash(img, index)">
+                <font-awesome-icon icon="trash"></font-awesome-icon>
+              </button>
+            </div>
           </div>
         </div>
       </vue-custom-scrollbar>
@@ -62,6 +77,9 @@ export default {
     clearHistory () {
       this.$store.dispatch('CLEAR_HISTORY')
       this.$electron.ipcRenderer.send('clear-history')
+    },
+    open (link) {
+      this.$electron.remote.shell.openExternal('https://reddit.com/' + link)
     },
     trash (img, index) {
       this.$store.dispatch('REMOVE', index)
@@ -124,12 +142,12 @@ export default {
       .image-buttons {
         opacity: 1;
         z-index: 1;
-        transition: opacity .2s ease-in-out;
+        transition: opacity 0.2s ease-in-out;
       }
 
       .image-title {
         opacity: 1;
-        transition: opacity .2s ease-in-out;      
+        transition: opacity 0.2s ease-in-out;
       }
     }
 
@@ -143,7 +161,7 @@ export default {
       background-color: rgba(0, 0, 0, 0.6);
       padding: 0 10px;
       opacity: 0; // Hidden
-      transition: opacity .2s ease-in-out;
+      transition: opacity 0.2s ease-in-out;
     }
 
     .image-buttons {
@@ -152,10 +170,12 @@ export default {
       left: 0;
       width: 100%;
       display: flex;
+      justify-content: space-between;
       opacity: 0; // Hidden
-      transition: opacity .2s ease-in-out;
+      transition: opacity 0.2s ease-in-out;
 
-      .left {
+      .left,
+      .right {
         display: flex;
         background-color: #0f111a;
         border-radius: 3px;
@@ -170,8 +190,6 @@ export default {
       }
 
       .trash {
-        position: absolute;
-        right: 0;
         color: #eee;
       }
 

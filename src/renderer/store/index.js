@@ -21,8 +21,9 @@ export default new Vuex.Store({
     settings: {
       repeats: true,
       startup: false,
-      download: false,
-      organize: false
+      download: true,
+      organize: true,
+      nsfw: false
     }
   },
   getters: {

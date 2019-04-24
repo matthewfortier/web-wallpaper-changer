@@ -65,7 +65,8 @@ import Page from '@/components/Page'
 import Button from '@/components/Button'
 import Checkbox from '@/components/Checkbox'
 import Settings from '@/components/Settings'
-import { clearInterval } from 'timers'
+
+import SetInterval from 'set-interval'
 
 export default {
   name: 'home',
@@ -113,12 +114,9 @@ export default {
         this.$store.dispatch('CHANGE_REFRESH', val)
         if (val) {
         // it seems to me this additional check would make sense?
-          this.timer = window.setInterval(() => {
-            this.grabImages()
-          }, this.getRefreshValue())
+          this.setRefreshInterval()
         } else {
-          window.clearInterval(this.timer)
-          this.timer = null
+          SetInterval.clear('refresh')
         }
       }
     },
@@ -164,7 +162,6 @@ export default {
   data () {
     return {
       process: this.$electron.remote.process.platform,
-      timer: null,
       scales: [],
       filterData: [
         { name: 'Hot', icon: 'burn' },
@@ -186,6 +183,7 @@ export default {
   },
   methods: {
     grabImages () {
+      console.log('Grab Image')
       this.$electron.ipcRenderer.send('grab-images', {
         subreddit: this.subs,
         scale: this.scale,
@@ -219,9 +217,10 @@ export default {
       return time
     },
     setRefreshInterval () {
-      this.timer = window.setInterval(() => {
+      SetInterval.start(this.grabImages, this.getRefreshValue(), 'refresh')
+      /* this.timer = window.setInterval(() => {
         this.grabImages()
-      }, this.getRefreshValue())
+      }, this.getRefreshValue()) */
     }
   },
   created () {

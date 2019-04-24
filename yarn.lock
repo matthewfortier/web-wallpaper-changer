@@ -4653,6 +4653,11 @@ interpret@^1.1.0:
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-1.2.0.tgz#d5061a6224be58e8083985f5014d844359576296"
   integrity sha512-mT34yGKMNceBQUoVn7iCDKDntA7SC6gycMAWzGx1z/CMCTV7b2AAtXlo3nRyHZ1FelRkQbQjprHSYGwzLtkVbw==
 
+interval@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/interval/-/interval-0.1.1.tgz#08d74d1f1db1bb9b069f5e22819f44f7241988ed"
+  integrity sha1-CNdNHx2xu5sGn14igZ9E9yQZiO0=
+
 invariant@^2.2.0, invariant@^2.2.2:
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/invariant/-/invariant-2.2.4.tgz#610f3c92c9359ce1db616e538008d23ff35158e6"
@@ -7715,6 +7720,11 @@ set-blocking@^2.0.0, set-blocking@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/set-blocking/-/set-blocking-2.0.0.tgz#045f9782d011ae9a6803ddd382b24392b3d890f7"
   integrity sha1-BF+XgtARrppoA93TgrJDkrPYkPc=
+
+set-interval@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/set-interval/-/set-interval-2.0.3.tgz#c96916e70f38dde15b81e7431e07032a1f3eaba0"
+  integrity sha1-yWkW5w843eFbgedDHgcDKh8+q6A=
 
 set-value@^0.4.3:
   version "0.4.3"

@@ -18,7 +18,8 @@ import {
   faStar,
   faMinusSquare,
   faTrash,
-  faCheck
+  faCheck,
+  faExternalLinkAlt
 } from '@fortawesome/free-solid-svg-icons'
 
 import { faMinusSquare as farMinusSquare, faSquare } from '@fortawesome/free-regular-svg-icons'
@@ -38,6 +39,7 @@ library.add(farMinusSquare)
 library.add(faTrash)
 library.add(faCheck)
 library.add(faSquare)
+library.add(faExternalLinkAlt)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 

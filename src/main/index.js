@@ -276,6 +276,10 @@ function filterOutBlacklist (res) {
   return res.filter(value => !blacklist.includes(value.data.url))
 }
 
+function filterOutNSFW (res) {
+  return res.filter(value => !value.data['over_18'] || !value.data['whitelist_status'] === 'promo_adult_nsfw')
+}
+
 function grabImages (args) {
   console.log(buildURL(args))
   var url = buildURL(args)
@@ -289,6 +293,10 @@ function grabImages (args) {
     if (!store.getters.SETTINGS.repeats) {
       children = filterOutHistory(children)
       console.log('Minus History: ' + children.length)
+    }
+
+    if (!store.getters.SETTINGS.nsfw) {
+      children = filterOutNSFW(children)
     }
 
     if (children.some(child => isValidFormat(child.data.url))) {
@@ -305,6 +313,7 @@ function grabImages (args) {
         origin: 'background',
         link: image.data.url,
         title: image.data.title,
+        permalink: image.data.permalink,
         scale: args.scale,
         subreddit: url.subreddit
       })
@@ -356,6 +365,7 @@ function changeWallaper (args) {
         store.dispatch('ADD_TO_HISTORY', {
           link: args.link,
           title: args.title,
+          permalink: args.permalink,
           sub: args.subreddit,
           fav: false,
           blacklist: false,
