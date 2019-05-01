@@ -8,15 +8,23 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     history: [],
-    form: {
+    scale: 'Fit',
+    autoRefresh: false,
+    refreshInterval: 60,
+    intervalType: 'seconds',
+    api: 'reddit',
+    reddit: {
       subs: 'wallpaper',
-      scale: 'Fit',
       count: 100,
-      autoRefresh: false,
-      refreshInterval: 60,
-      intervalType: 'seconds',
       filter: 'Hot',
       subFilter: 'Hour'
+    },
+    unsplash: {
+      terms: '',
+      collection: 'collection',
+      id: '',
+      resolution: '1920x1080',
+      featured: false
     },
     settings: {
       repeats: true,
@@ -30,35 +38,32 @@ export default new Vuex.Store({
     HISTORY: state => {
       return state.history
     },
+    API: state => {
+      return state.api
+    },
     FAVORITES: state => {
       return state.history.filter(image => image.fav)
     },
     BLACKED: state => {
       return state.history.filter(image => image.blacklist)
     },
-    SUBS: state => {
-      return state.form.subs
-    },
     SCALE: state => {
-      return state.form.scale
-    },
-    COUNT: state => {
-      return state.form.count
+      return state.scale
     },
     REFRESH: state => {
-      return state.form.autoRefresh
+      return state.autoRefresh
     },
     REFRESH_INTERVAL: state => {
-      return state.form.refreshInterval
+      return state.refreshInterval
     },
     INTERVAL_TYPE: state => {
-      return state.form.intervalType
+      return state.intervalType
     },
-    FILTER: state => {
-      return state.form.filter
+    REDDIT: state => {
+      return state.reddit
     },
-    SUB_FILTER: state => {
-      return state.form.subFilter
+    UNSPLASH: state => {
+      return state.unsplash
     },
     SETTINGS: state => {
       return state.settings
@@ -86,29 +91,26 @@ export default new Vuex.Store({
     CLEAR_HISTORY (state) {
       state.history.splice(0)
     },
-    CHANGE_SUBS (state, payload) {
-      state.form.subs = payload
+    CHANGE_API (state, payload) {
+      state.api = payload
     },
     CHANGE_SCALE (state, payload) {
-      state.form.scale = payload
-    },
-    CHANGE_COUNT (state, payload) {
-      state.form.count = payload > 100 ? 100 : payload
+      state.scale = payload
     },
     CHANGE_REFRESH (state, payload) {
-      state.form.autoRefresh = payload
+      state.autoRefresh = payload
     },
     CHANGE_INTERVAL (state, payload) {
-      state.form.refreshInterval = payload
+      state.refreshInterval = payload
     },
     CHANGE_INTERVAL_TYPE (state, payload) {
-      state.form.intervalType = payload
+      state.intervalType = payload
     },
-    CHANGE_FILTER (state, payload) {
-      state.form.filter = payload
+    CHANGE_REDDIT (state, payload) {
+      state.reddit[payload.setting] = payload.value
     },
-    CHANGE_SUB_FILTER (state, payload) {
-      state.form.subFilter = payload
+    CHANGE_UNSPLASH (state, payload) {
+      state.unsplash[payload.setting] = payload.value
     },
     CHANGE_SETTING (state, payload) {
       state.settings[payload.setting] = payload.value
@@ -141,14 +143,11 @@ export default new Vuex.Store({
     CLEAR_HISTORY (context) {
       context.commit('CLEAR_HISTORY')
     },
-    CHANGE_SUBS (context, payload) {
-      context.commit('CHANGE_SUBS', payload)
+    CHANGE_API (context, payload) {
+      context.commit('CHANGE_API', payload)
     },
     CHANGE_SCALE (context, payload) {
       context.commit('CHANGE_SCALE', payload)
-    },
-    CHANGE_COUNT (context, payload) {
-      context.commit('CHANGE_COUNT', payload)
     },
     CHANGE_REFRESH (context, payload) {
       context.commit('CHANGE_REFRESH', payload)
@@ -159,11 +158,11 @@ export default new Vuex.Store({
     CHANGE_INTERVAL_TYPE (context, payload) {
       context.commit('CHANGE_INTERVAL_TYPE', payload)
     },
-    CHANGE_FILTER (context, payload) {
-      context.commit('CHANGE_FILTER', payload)
+    CHANGE_REDDIT (context, payload) {
+      context.commit('CHANGE_REDDIT', payload)
     },
-    CHANGE_SUB_FILTER (context, payload) {
-      context.commit('CHANGE_SUB_FILTER', payload)
+    CHANGE_UNSPLASH (context, payload) {
+      context.commit('CHANGE_UNSPLASH', payload)
     },
     CHANGE_SETTING (context, payload) {
       context.commit('CHANGE_SETTING', payload)

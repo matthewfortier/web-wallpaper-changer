@@ -280,7 +280,15 @@ function filterOutNSFW (res) {
   return res.filter(value => !value.data['over_18'] || !value.data['whitelist_status'] === 'promo_adult_nsfw')
 }
 
-function grabImages (args) {
+function grabImages () {
+  var args = {
+    scale: store.getters.SCALE,
+    subreddit: store.getters.REDDIT.subs,
+    filter: store.getters.REDDIT.filter,
+    subFilter: store.getters.REDDIT.subFilter,
+    count: store.getters.REDDIT.count
+  }
+
   console.log(buildURL(args))
   var url = buildURL(args)
   axios.get(url.url).then(res => {
@@ -403,8 +411,8 @@ ipcMain.on('clear-history', () => {
   })
 })
 
-ipcMain.on('grab-images', (event, args) => {
-  grabImages(args)
+ipcMain.on('grab-images', () => {
+  grabImages()
 })
 
 ipcMain.on('change-wallpaper', (event, args) => {

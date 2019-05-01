@@ -1,30 +1,15 @@
 <template>
   <div class="main-content">
-    <label id="subs-label" for="subs">Subreddit(s):</label>
-    <section id="reddit">
-      <input id="subs" placeholder="subreddits" v-model="subs" type="text">
-    </section>
-    <section id="reddit">
+    <section id="api">
       <Dropdown
-        :selected="filter"
-        :data="filterData"
+        :selected="api"
+        :data="apis"
         :color="'#82aaff'"
-        :margin="
-          filter != 'Controversial' && filter != 'Top' ? '0px 5px 0px 0px' : ''
-        "
-        v-on:select="filter = $event"
+        v-on:select="api = $event"
       />
-      <Dropdown
-        class="subFilter"
-        v-if="filter == 'Controversial' || filter == 'Top'"
-        :selected="subFilter"
-        :data="subFilterData"
-        :color="'#82aaff'"
-        :margin="'0px 5px'"
-        v-on:select="subFilter = $event"
-      />
-      <input id="count" placeholder="#" v-model="count" @change="autoRefresh = false" type="text">
     </section>
+    <Reddit v-if='api === "reddit"' />
+    <Unsplash v-else />
     <label id="scales-label" for="scales">Scale:</label>
     <section id="segmented-control">
       <ul>
@@ -65,6 +50,8 @@ import Page from '@/components/Page'
 import Button from '@/components/Button'
 import Checkbox from '@/components/Checkbox'
 import Settings from '@/components/Settings'
+import Reddit from '@/components/Reddit'
+import Unsplash from '@/components/Unsplash'
 
 import SetInterval from 'set-interval'
 
@@ -75,9 +62,19 @@ export default {
     Page,
     Button,
     Checkbox,
+    Reddit,
+    Unsplash,
     Settings
   },
   computed: {
+    api: {
+      get () {
+        return this.$store.getters.API
+      },
+      set (val) {
+        this.$store.dispatch('CHANGE_API', val)
+      }
+    },
     scale: {
       get () {
         return this.$store.getters.SCALE
@@ -85,24 +82,6 @@ export default {
       set (val) {
         console.log('SET_SCALE')
         this.$store.dispatch('CHANGE_SCALE', val)
-      }
-    },
-    subs: {
-      get () {
-        return this.$store.getters.SUBS
-      },
-      set (val) {
-        console.log(val)
-        this.$store.dispatch('CHANGE_SUBS', val)
-      }
-    },
-    count: {
-      get () {
-        return this.$store.getters.COUNT
-      },
-      set (val) {
-        console.log(val)
-        this.$store.dispatch('CHANGE_COUNT', val)
       }
     },
     autoRefresh: {
@@ -139,44 +118,15 @@ export default {
         this.$store.dispatch('CHANGE_INTERVAL_TYPE', val)
         this.autoRefresh = false
       }
-    },
-    filter: {
-      get () {
-        return this.$store.getters.FILTER
-      },
-      set (val) {
-        console.log(val)
-        this.$store.dispatch('CHANGE_FILTER', val)
-      }
-    },
-    subFilter: {
-      get () {
-        return this.$store.getters.SUB_FILTER
-      },
-      set (val) {
-        console.log(val)
-        this.$store.dispatch('CHANGE_SUB_FILTER', val)
-      }
     }
   },
   data () {
     return {
       process: this.$electron.remote.process.platform,
       scales: [],
-      filterData: [
-        { name: 'Hot', icon: 'burn' },
-        { name: 'New', icon: 'certificate' },
-        { name: 'Controversial', icon: 'bolt' },
-        { name: 'Top', icon: 'arrow-up' },
-        { name: 'Rising', icon: 'chart-line' }
-      ],
-      subFilterData: [
-        { name: 'Hour', id: 'hour' },
-        { name: '24 Hour', id: 'day' },
-        { name: 'Week', id: 'week' },
-        { name: 'Month', id: 'month' },
-        { name: 'Year', id: 'year' },
-        { name: 'All', id: 'all' }
+      apis: [
+        { name: 'Reddit', id: 'reddit' },
+        { name: 'Unsplash', id: 'unsplash' }
       ],
       intervals: [{ name: 'seconds' }, { name: 'minutes' }, { name: 'hours' }]
     }
@@ -184,13 +134,7 @@ export default {
   methods: {
     grabImages () {
       console.log('Grab Image')
-      this.$electron.ipcRenderer.send('grab-images', {
-        subreddit: this.subs,
-        scale: this.scale,
-        filter: this.filter,
-        subFilter: this.subFilter,
-        count: this.count
-      })
+      this.$electron.ipcRenderer.send('grab-images')
     },
     changeWallpaper () {
       this.autoRefresh = false
@@ -288,10 +232,6 @@ label {
   }
 }
 
-#reddit {
-  display: flex;
-}
-
 #segmented-control {
   ul {
     list-style-type: none;
@@ -351,13 +291,6 @@ input[type="text"] {
   border-radius: 3px;
   font-family: "Calibre", sans-serif;
   font-size: 1rem;
-
-  &#subs,
-  &#count {
-    color: #82aaff;
-    border: 1px solid #82aaff;
-    width: 100%;
-  }
 
   &#interval {
     color: #f78c6c;
