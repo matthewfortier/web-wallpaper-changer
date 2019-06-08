@@ -1,6 +1,18 @@
-# radiant
+# Radiant Wallpaper Changer
 
-> An electron-vue project
+> automatically changing your desktop wallpaper to images from your favorite subreddits.
+
+![Radiant Screenshot](https://i.imgur.com/7t0KKkN.png)
+
+## Features
+- Pull images form a given subreddits Hot, Top, New, Controverisal, and Rising filters
+- View history of previous wallapers
+- Mark previous wallpapers as Favorites
+- Blacklist previous wallpapers
+- Set the wallpaper scale
+- Configure wallpaper update interval
+- Option to filter out repeat images
+- Option to save all wallpapers
 
 #### Build Setup
 
