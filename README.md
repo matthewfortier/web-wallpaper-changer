@@ -1,4 +1,4 @@
-# Radiant Wallpaper Changer
+# PC/Mac Wallpaper Changer
 
 > automatically changing your desktop wallpaper to images from your favorite subreddits.
 
